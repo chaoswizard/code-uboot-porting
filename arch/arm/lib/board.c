@@ -256,6 +256,30 @@ init_fnc_t *init_sequence[] = {
 	NULL,
 };
 
+//wx:comment this is the asm code run jump to first C function 
+//   and the C stack pointer is CONFIG_SYS_INIT_SP_ADDR
+//-------wx-----------------------
+//|low=? (dymatic address, decide by high top size)
+//| 		- <Start STACK ADDR:start_addr_sp>		
+//| [ - SPL 			   // if not support second program loader
+//| 		- ABORT STACK (12 Byte)  
+//| 		- IRQ_SIZE + FIQ SIZE (by user configure)	
+//| 		- IRQ_SP_ADDR | // up is stack, down is system global data
+//| 		- sizeof (gd_t) = gd
+//| 		- sizeof (bd_t)
+//| 		- Malloc Buffer  (by user configure)
+//| ]		  
+//| 		->>>>> Relocate address start >>>>>>>>>>>>>>>>
+//| 		- U-BOOT bssEnd - start (this code run space size)
+//| 		-<<<<< Relocate address  end <<<<<<<<<<<<<<<<<
+//| 		- Frame Buffer
+//| 		- MMU TLB 
+//| 		- Protected Ram
+//| 		- Log	Buffer
+//| 		- Top Hide Buffer (CONFIG_SYS_MEM_TOP_HIDE)
+//|high (2M)=0x30200000
+//---------------------------------  
+
 void board_init_f(ulong bootflag)
 {
 	bd_t *bd;

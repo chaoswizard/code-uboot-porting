@@ -70,7 +70,7 @@ _fiq:			.word fiq
  *
  *************************************************************************
  */
-
+  
 .globl _TEXT_BASE
 _TEXT_BASE:
 	.word	CONFIG_SYS_TEXT_BASE
@@ -81,6 +81,25 @@ _TEXT_BASE:
  * relative position in the executable instead of leaving
  * them null.
  */
+ /* wx:comment:layout of symbol load
+	*  |---------LOW-------------
+	*  |	 text
+	*  |	 data
+	*  |---------------------------
+	*  |	  u-boot-cmd
+	*  |------------------__rel_dyn_start
+	*  |	 rel.dyn
+	*  |------------------__rel_dyn_end
+	*  |------------------__dynsym_start
+	*  |	 dynsym
+	*  |--------------------_end
+	*  |--------------------_bss_start
+	*  |	 bss
+	*  |--------------------__bss_end__
+	*  |	 other
+	*  |---------------------------
+*/
+ 
 .globl _bss_start_ofs
 _bss_start_ofs:
 	.word __bss_start - _start
@@ -138,8 +157,6 @@ copyex:
 #endif
 
 #ifdef CONFIG_S3C24X0
-	/* turn off the watchdog */
-
 # if defined(CONFIG_S3C2400)
 #  define pWTCON	0x15300000
 #  define INTMSK	0x14400008	/* Interrupt-Controller base addresses */
@@ -151,6 +168,7 @@ copyex:
 #  define CLKDIVN	0x4C000014	/* clock divisor register */
 # endif
 
+	/* turn off the watchdog */
 	ldr	r0, =pWTCON
 	mov	r1, #0x0
 	str	r1, [r0]
@@ -165,13 +183,52 @@ copyex:
 	ldr	r1, =0x3ff
 	ldr	r0, =INTSUBMSK
 	str	r1, [r0]
+# elif defined(CONFIG_S3C2440)
+	ldr r1, =0x7fff
+	ldr r0, =INTSUBMSK
+	str r1, [r0]
 # endif
 
+# if defined(CONFIG_S3C2440)
+#define CLK_CTL_BASE   	(0x4C000000)	
+#define MDIV_405	    (0x21)
+#define PSDIV_405  	    (0x7f << 12	)
+
+	/*	
+	 * FCLK:HCLK:PCLK = 1:4:8  
+	 * because we will set fclk, hclk, pclk, at different speed,  
+	 * the CLKDIVEN should be changed, and the C15 should be set  
+	 * please see Chapter 7 Page 9	
+	 */  
+	ldr r0, =CLKDIVN
+	mov r1, #5
+	str r1, [r0]
+
+	/*	
+	 * orr	r0, r0, #R1_nF:OR:R1_iA  
+	 * This strange thing comes from the C15 co-processor  
+	 */  
+	mrc p15, 0, r1, c1, c0, 0	
+	orr r1, r1, #0xc0000000 	
+	mcr p15, 0, r1, c1, c0, 0	
+
+
+	/*	
+	 * set mpll to 405Mhz, see C7P21  
+	 */  
+	mov	r1, #CLK_CTL_BASE	
+	mov	r2, #MDIV_405	
+	add	r2, r2, #PSDIV_405	
+	str r2, [r1, #0x04] 	/* MPLLCON = CLK_BASE+4  */
+
+# else
 	/* FCLK:HCLK:PCLK = 1:2:4 */
 	/* default FCLK is 120 MHz ! */
 	ldr	r0, =CLKDIVN
 	mov	r1, #3
 	str	r1, [r0]
+#endif /*CONFIG_S3C2440*/
+
 #endif	/* CONFIG_S3C24X0 */
 
 	/*
@@ -183,6 +240,18 @@ copyex:
 #endif
 
 /* Set stackpointer in internal RAM to call board_init_f */
+/*
+ wx:comment: start.s jump to c function need useed a stack(CONFIG_SYS_INIT_SP_ADDR)
+ (this must inited before call any c function)
+ the GENERATED_GBL_DATA_SIZE(global_data) is create by kbulid tools as in asm-offsets.c
+ ---------------------------------
+ |(nGCS6)=0x30000000  
+ |       +SP_SIZE ?(dymatic size, decide by gd size)     
+ |       =INIT_SP_ADDR | // up is stack, down is system global data(is used in board_init_f)
+ |       +sizeof(struct global_data) = gd
+ |   (4K)=0x30001000
+ ---------------------------------  
+*/
 call_board_init_f:
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
 	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
@@ -190,6 +259,29 @@ call_board_init_f:
 	bl	board_init_f
 
 /*------------------------------------------------------------------------------*/
+	/* wx:comment:layout relocate
+	 |----high memery--------------
+	 |	 bss		|
+	 |-------------
+	 |	sym talbe	|
+	 |-------------
+	 |	rel dyn 	|
+	 |---------------------
+	 |	text code	|		|  
+	 |-------------------	| ------ R6 (Dest Addr) ----
+	 |						| R9	|					
+	 |						|<----	|					
+	 |------------	-		|		| R9 (offset)	   
+	 |	  bss		|		|		|<-------------------
+	 |-------------?		|		|					
+	 |	sym talbe	|		|		|					
+	 |-------------R10		|		|					
+	 |-------------R3	|		|
+	 |	rel dyn 	|		|		|
+	 |-------------R2-----		|
+	 |	text code	|				|
+	 |-------------  TEXT_BASE -----------------------
+	*/
 
 /*
  * void relocate_code (addr_sp, gd, addr_moni)
@@ -396,14 +488,31 @@ cpu_init_crit:
  * use bad_save_user_regs for abort/prefetch/undef/swi ...
  * use irq_save_user_regs / irq_restore_user_regs for IRQ/FIQ handling
  */
-
+    /* wx:comment: current stack as bleow(SP not move any offset)
+	 |  ------------ HIGH -------------------
+	 |  SPSR [caller(interupt break point)'s cpsr]                 
+	 |  LR   [caller(interupt break point)'s PC] == IRQ_STACK_START_IN <= current SP 
+	 |  -------- LOW ------------------------
+    */
 	.macro	bad_save_user_regs
 	sub	sp, sp, #S_FRAME_SIZE
 	stmia	sp, {r0 - r12}			@ Calling r0-r12
 	ldr	r2, IRQ_STACK_START_IN
 	ldmia	r2, {r2 - r3}			@ get pc, cpsr
 	add	r0, sp, #S_FRAME_SIZE		@ restore sp_SVC
-
+    /* wx:comment: current stack as bleow(SP not move any offset)
+	 |-----------------HIGH-----------------------------
+	 |  SPSR [caller(interupt break point)'s cpsr]              |
+	 |  LR	[caller(interupt break point)'s PC]  == IRQ_STACK_START_IN 
+	 |  -------------- SPSR -(same as the hight spsr)-
+	 |  -------------- LR ---(same as the hight LR)-
+	 |  -------------- LR ---(same as the hight LR)-
+	 |  -------------- SP Point To IRQ_STACK_START_IN
+	 |  R12                                    
+  	 |  R11
+  	 |  ...
+  	 |  R0  <= current SP 
+    */
 	add	r5, sp, #S_SP
 	mov	r1, lr
 	stmia	r5, {r0 - r3}			@ save sp_SVC, lr_SVC, pc, cpsr
@@ -437,6 +546,13 @@ cpu_init_crit:
 	str	lr, [r13]			@ save caller lr / spsr
 	mrs	lr, spsr
 	str	lr, [r13, #4]
+	
+    /* wx:comment: the current stack as bleow(SP not move any offset)
+	 |  ------------ HIGH -------------------
+	 |  SPSR [caller(interupt break point)'s cpsr]              |
+	 |  LR   [caller(interupt break point)'s PC] <= current SP  |
+	 |  ------------- LOW -------------------
+    */
 
 	mov	r13, #MODE_SVC			@ prepare SVC-Mode
 	@ msr	spsr_c, r13

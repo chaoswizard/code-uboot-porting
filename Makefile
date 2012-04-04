@@ -371,7 +371,10 @@ ALL-$(CONFIG_SPL) += $(obj)spl/u-boot-spl.bin
 ALL-$(CONFIG_OF_SEPARATE) += $(obj)u-boot.dtb $(obj)u-boot-dtb.bin
 
 all:		$(ALL-y) $(SUBDIR_EXAMPLES)
-
+		cp   -f u-boot.bin   ///mnt/hgfs/MyCodeDesign/gitxx_boot.bin
+		@echo wangxi mini2440 u-boot compile ok
+		@pwd
+		
 $(obj)u-boot.dtb:	$(obj)u-boot
 		$(MAKE) -C dts binary
 		mv $(obj)dts/dt.dtb $@
