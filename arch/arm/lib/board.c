@@ -291,6 +291,7 @@ void board_init_f(ulong bootflag)
 #endif
 
 	/* Pointer is writable since we allocated a register for it */
+	// wx: align to 8 byte
 	gd = (gd_t *) ((CONFIG_SYS_INIT_SP_ADDR) & ~0x07);
 	/* compiler optimization barrier needed for GCC >= 3.4 */
 	__asm__ __volatile__("": : :"memory");
@@ -334,6 +335,8 @@ void board_init_f(ulong bootflag)
 	gd->ram_size -= CONFIG_SYS_MEM_TOP_HIDE;
 #endif
 
+    //wx:point the high top address, this routine run on low 4K address
+    // and the resource memery is allocal form high top.
 	addr = CONFIG_SYS_SDRAM_BASE + gd->ram_size;
 
 #ifdef CONFIG_LOGBUFFER
@@ -370,7 +373,7 @@ void board_init_f(ulong bootflag)
 	debug("Top of RAM usable for U-Boot at: %08lx\n", addr);
 
 #ifdef CONFIG_LCD
-#ifdef CONFIG_FB_ADDR
+#ifdef CONFIG_FB_ADDR //wx:comment:frame buffer
 	gd->fb_base = CONFIG_FB_ADDR;
 #else
 	/* reserve memory for LCD display (always full pages) */
@@ -388,6 +391,10 @@ void board_init_f(ulong bootflag)
 
 	debug("Reserving %ldk for U-Boot at: %08lx\n", gd->mon_len >> 10, addr);
 
+    //wx:comment: Second Program Loader, useed for load the os image and
+    //  provid some function, likely as the BIOS.s
+    // here is no used for SPL, hence, must has itself runtime space, 
+    // include  heap, stack ..
 #ifndef CONFIG_SPL_BUILD
 	/*
 	 * reserve memory for malloc() arena

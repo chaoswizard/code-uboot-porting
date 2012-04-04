@@ -65,7 +65,7 @@ static ulong get_PLLCLK(int pllreg)
 	s = r & 0x3;
 
 #if defined(CONFIG_S3C2440)
-	if (pllreg == MPLL)
+	if (pllreg == MPLL) // wx:comment:ref spec: PLL=(2 X m X Fin)/(p X 2^s)
 		return 2 * m * (CONFIG_SYS_CLK_FREQ / (p << s));
 #endif
 	return (CONFIG_SYS_CLK_FREQ * m) / (p << s);

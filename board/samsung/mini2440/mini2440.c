@@ -32,7 +32,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define FCLK_SPEED 1
+#define FCLK_SPEED 2   //wx:replace 1
 
 #if FCLK_SPEED==0		/* Fout = 203MHz, Fin = 12MHz for Audio */
 #define M_MDIV	0xC3
@@ -42,17 +42,25 @@ DECLARE_GLOBAL_DATA_PTR;
 #define M_MDIV	0xA1
 #define M_PDIV	0x3
 #define M_SDIV	0x1
+#elif FCLK_SPEED==2    /*wx:add: Fout=405MHz*/
+#define M_MDIV	0x7F  // ref s3c2440 spec:PLL VALUE SELECTION
+#define M_PDIV	0x2
+#define M_SDIV	0x1
 #endif
 
-#define USB_CLOCK 1
+#define USB_CLOCK 2  //wx:replace 1
 
-#if USB_CLOCK==0
+#if USB_CLOCK==0 
 #define U_M_MDIV	0xA1
 #define U_M_PDIV	0x3
 #define U_M_SDIV	0x1
 #elif USB_CLOCK==1
 #define U_M_MDIV	0x48
 #define U_M_PDIV	0x3
+#define U_M_SDIV	0x2
+#elif USB_CLOCK==2       // Fout = 48Mhz
+#define U_M_MDIV	0x38
+#define U_M_PDIV	0x2
 #define U_M_SDIV	0x2
 #endif
 
@@ -112,8 +120,9 @@ int board_early_init_f(void)
 
 int board_init(void)
 {
-	/* arch number of SMDK2410-Board */
-	gd->bd->bi_arch_number = MACH_TYPE_SMDK2410;
+	/* arch number of mini2440-Board*/
+	gd->bd->bi_arch_number = MACH_TYPE_MINI2440;//MACH_TYPE_SMDK2410
+	
 
 	/* adress of boot parameters */
 	gd->bd->bi_boot_params = 0x30000100;
@@ -127,6 +136,7 @@ int board_init(void)
 int dram_init(void)
 {
 	/* dram_init must store complete ramsize in gd->ram_size */
+	//wx: this will be called at initquence table (board.c:init_sequence last item)
 	gd->ram_size = PHYS_SDRAM_1_SIZE;
 	return 0;
 }

@@ -161,7 +161,7 @@ copyex:
 #  define pWTCON	0x15300000
 #  define INTMSK	0x14400008	/* Interrupt-Controller base addresses */
 #  define CLKDIVN	0x14800014	/* clock divisor register */
-#else
+#else //wx:comment : blow register is same 2410 and 2440
 #  define pWTCON	0x53000000
 #  define INTMSK	0x4A000008	/* Interrupt-Controller base addresses */
 #  define INTSUBMSK	0x4A00001C
@@ -307,12 +307,16 @@ stack_setup:
 	ldr	r3, _bss_start_ofs
 	add	r2, r0, r3		/* r2 <- source end address	    */
 
+ /*wx:comment:copy text+data to destination*/
 copy_loop:
 	ldmia	r0!, {r9-r10}		/* copy from source address [r0]    */
 	stmia	r1!, {r9-r10}		/* copy to   target address [r1]    */
 	cmp	r0, r2			/* until source end address [r2]    */
 	blo	copy_loop
 
+    /*wx:comment:if need not second program load(means this system run 
+    * for itself memory, and need hold on at all runtime)
+    */
 #ifndef CONFIG_SPL_BUILD
 	/*
 	 * fix .rel.dyn relocations
@@ -558,7 +562,9 @@ cpu_init_crit:
 	@ msr	spsr_c, r13
 	msr	spsr, r13
 	mov	lr, pc
-	movs	pc, lr
+	/*@ wx:comment:return exception and restore cpsr from spsr_mode(return 
+	and auto switch to svc mode)*/
+	movs	pc, lr              
 	.endm
 
 	.macro get_irq_stack			@ setup IRQ stack

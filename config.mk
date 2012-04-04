@@ -249,6 +249,7 @@ AFLAGS := $(AFLAGS_DEBUG) -D__ASSEMBLY__ $(CPPFLAGS)
 LDFLAGS += $(PLATFORM_LDFLAGS)
 LDFLAGS_FINAL += -Bstatic
 
+#wx:comment: set the linker mode with the lds(-T ldfilepath) and entry point(-Ttxt)
 LDFLAGS_u-boot += -T $(obj)u-boot.lds $(LDFLAGS_FINAL)
 ifneq ($(CONFIG_SYS_TEXT_BASE),)
 LDFLAGS_u-boot += -Ttext $(CONFIG_SYS_TEXT_BASE)

@@ -48,10 +48,10 @@
 #endif
 
 #ifndef	CONFIG_ENV_MIN_ENTRIES	/* minimum number of entries */
-#define	CONFIG_ENV_MIN_ENTRIES 64
+#define	CONFIG_ENV_MIN_ENTRIES 64  //wx:comment: 8 byte per entry, so minsize is 512 byte
 #endif
 #ifndef	CONFIG_ENV_MAX_ENTRIES	/* maximum number of entries */
-#define	CONFIG_ENV_MAX_ENTRIES 512
+#define	CONFIG_ENV_MAX_ENTRIES 512  //wx:comment: 8 byte per entry, so maxsize is 4K byte
 #endif
 
 #include "search.h"
@@ -260,8 +260,8 @@ int hsearch_r(ENTRY item, ACTION action, ENTRY ** retval,
 	hval = len;
 	count = len;
 	while (count-- > 0) {
-		hval <<= 4;
-		hval += item.key[count];
+		hval <<= 4;// wx:comment:4 bit per segment, and computer a vaule is very different
+		hval += item.key[count];//wx:comment:may be carry a new val, and the value will more differnet
 	}
 
 	/*
@@ -715,7 +715,7 @@ int himport_r(struct hsearch_data *htab,
 		}
 
 		/* parse name */
-		for (name = dp; *dp != '=' && *dp && *dp != sep; ++dp)
+		for (name = dp; *dp != '=' && *dp && *dp != sep; ++dp)// wx:comment:search first '=' between line start and separtor
 			;
 
 		/* deal with "name" and "name=" entries (delete var) */
@@ -727,7 +727,7 @@ int himport_r(struct hsearch_data *htab,
 
 			debug("DELETE CANDIDATE: \"%s\"\n", name);
 
-			if (hdelete_r(name, htab) == 0)
+			if (hdelete_r(name, htab) == 0) // wx:comment: if name=NULL, means delete this item
 				debug("DELETE ERROR ##############################\n");
 
 			continue;
@@ -735,8 +735,8 @@ int himport_r(struct hsearch_data *htab,
 		*dp++ = '\0';	/* terminate name */
 
 		/* parse value; deal with escapes */
-		for (value = sp = dp; *dp && (*dp != sep); ++dp) {
-			if ((*dp == '\\') && *(dp + 1))
+		for (value = sp = dp; *dp && (*dp != sep); ++dp) { //wx:comment:parse char until meet the sepator(if '=', parse as value)
+			if ((*dp == '\\') && *(dp + 1))//wx:comment:if value use mutiline, and deal next line
 				++dp;
 			*sp++ = *dp;
 		}

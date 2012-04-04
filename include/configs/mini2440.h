@@ -127,7 +127,7 @@
  * Miscellaneous configurable options
  */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
-#define CONFIG_SYS_PROMPT	"SMDK2410 # "
+#define CONFIG_SYS_PROMPT	"[MINI2440]#" //wx:comment:boot command line prefix string
 #define CONFIG_SYS_CBSIZE	256
 /* Print Buffer Size */
 #define CONFIG_SYS_PBSIZE	(CONFIG_SYS_CBSIZE + \
@@ -168,10 +168,11 @@
  * Physical Memory Map
  */
 #define CONFIG_NR_DRAM_BANKS	1          /* we have 1 bank of DRAM */
-#define PHYS_SDRAM_1		0x30000000 /* SDRAM Bank #1 */
-#define PHYS_SDRAM_1_SIZE	0x04000000 /* 64 MB */
+#define PHYS_SDRAM_1		0x30000000 /* SDRAM Bank #1 ,wx:2440_sdram bank(nGCS6) is mapped to 0x30000000*/
+#define PHYS_SDRAM_1_SIZE	0x04000000 /* wx:32M X 2=64M  HY57V561620FTP*/
 
-#define PHYS_FLASH_1		0x00000000 /* Flash Bank #0 */
+//wx:comment:Norfalsh SST39VF1601 is conected NGCS0(0x00000000)
+#define PHYS_FLASH_1		0x00000000 /* Flash Bank #0 */ //wx:comment this will be a member of __cfi_flash_bank_addr
 
 #define CONFIG_SYS_FLASH_BASE	PHYS_FLASH_1
 
@@ -179,17 +180,22 @@
  * FLASH and environment organization
  */
 
+//wx:comment: bleow is configure of NorFlash SST39VF1601
 #define CONFIG_SYS_FLASH_CFI
 #define CONFIG_FLASH_CFI_DRIVER
-#define CONFIG_FLASH_CFI_LEGACY
-#define CONFIG_SYS_FLASH_LEGACY_512Kx16
+#define CONFIG_SYS_CFI_FLASH_CONFIG_REGS {0xffff} //(0xffff is invalid),wx:replace: CONFIG_FLASH_CFI_LEGACY
+#define CONFIG_SYS_FLASH_LEGACY_1024Kx16          //(mini2440 NorFlah_SST 39VF1601)wx:replace: CONFIG_SYS_FLASH_LEGACY_512Kx16
 #define CONFIG_FLASH_SHOW_PROGRESS	45
 
-#define CONFIG_SYS_MAX_FLASH_BANKS	1
-#define CONFIG_SYS_FLASH_BANKS_LIST     { CONFIG_SYS_FLASH_BASE }
-#define CONFIG_SYS_MAX_FLASH_SECT	(19)
+#define CONFIG_SYS_MAX_FLASH_BANKS	1 ////wx:comment this will be the member count of all cfi flah( __cfi_flash_bank_addr)
+#define CONFIG_SYS_FLASH_BANKS_LIST     { CONFIG_SYS_FLASH_BASE }/*wx:comment this will be a member list,_as the return of_cfi_flash_bank_addr*/
 
-#define CONFIG_ENV_ADDR			(CONFIG_SYS_FLASH_BASE + 0x070000)
+ /*SST39VF1601, operator mode is block and sector, now we use sector mode,
+  * and 1 sector=2K word = 4K byte, so our flash is (2M / 4K) = 512
+  */
+#define CONFIG_SYS_MAX_FLASH_SECT	(35) //wx:replace:(19)
+
+#define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
 #define CONFIG_ENV_IS_IN_FLASH
 #define CONFIG_ENV_SIZE			0x10000
 /* allow to overwrite serial and ethaddr */
@@ -229,7 +235,17 @@
 #define CONFIG_RBTREE
 
 /* additions for new relocation code, must be added to all boards */
+//wx:comment physical ram start address.(mini2440 sdram use nGCS6)
 #define CONFIG_SYS_SDRAM_BASE	PHYS_SDRAM_1
+//  wx:comment: start.s jump to c function use bleow stack address(must init before call c function)
+// the GENERATED_GBL_DATA_SIZA(global_data) is create by kbulid tools as in asm-offsets.c
+//---------------------------------
+//|(nGCS6)=0x30000000  
+//|       +SP_SIZE ?(dymatic size, decide by gd size)     
+//|       =INIT_SP_ADDR | // up is stack, down is system global data
+//|       +sizeof(struct global_data) = gd
+//|   (4K)=0x30001000
+//---------------------------------  
 #define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_SYS_SDRAM_BASE + 0x1000 - \
 				GENERATED_GBL_DATA_SIZE)
 

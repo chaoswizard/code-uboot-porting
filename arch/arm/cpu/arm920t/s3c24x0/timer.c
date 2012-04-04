@@ -35,8 +35,16 @@
 #include <asm/io.h>
 #include <asm/arch/s3c24x0_cpu.h>
 
+#if  0 //wx:delete
 int timer_load_val = 0;
 static ulong timer_clk;
+#else //wx:replace to this block
+
+DECLARE_GLOBAL_DATA_PTR;
+
+#define timer_load_val  (gd->timer_rate_hz)
+#define timer_clk       (gd->tbl)
+#endif
 
 /* macro to read the 16 bit timer */
 static inline ulong READ_TIMER(void)
@@ -46,8 +54,15 @@ static inline ulong READ_TIMER(void)
 	return readl(&timers->tcnto4) & 0xffff;
 }
 
+#if 0 
+/**
 static ulong timestamp;
 static ulong lastdec;
+*/
+#else
+#define timestamp    (gd->timer_reset_value)
+#define lastdec      (gd->lastinc)
+#endif
 
 int timer_init(void)
 {
