@@ -4,8 +4,9 @@
  * Copyright (C) 1999 2000 2001 Erik Mouw (J.A.K.Mouw@its.tudelft.nl) and
  *                     Jan-Derk Bakker (J.D.Bakker@its.tudelft.nl)
  *
- * Modified for the Samsung SMDK2410 by
- * (C) Copyright 2002
+ * Modified for the friendly-arm mini2440 by
+ * wang_xi@anyka.com
+ * (C) Copyright 2012
  * David Mueller, ELSOFT AG, <d.mueller@elsoft.ch>
  *
  * See file CREDITS for list of people who contributed to this
@@ -56,7 +57,7 @@
 #define B3_BWSCON		(DW16 + WAIT + UBLB)
 #define B4_BWSCON		(DW16)
 #define B5_BWSCON		(DW16)
-#define B6_BWSCON		(DW32)
+#define B6_BWSCON		(DW32) /*wx:SDRAM:(2 X 16)bit = 32*/
 #define B7_BWSCON		(DW32)
 
 /* BANK0CON */
@@ -93,6 +94,7 @@
 #define B3_Tacp			0x3     /*  6clk */
 #define B3_PMC			0x0	/* normal */
 
+/*wx:For LAN*/
 #define B4_Tacs			0x0	/*  0clk */
 #define B4_Tcos			0x0	/*  0clk */
 #define B4_Tacc			0x7	/* 14clk */
@@ -109,6 +111,7 @@
 #define B5_Tacp			0x0
 #define B5_PMC			0x0	/* normal */
 
+/*wx:For SDRAM*/
 #define B6_MT			0x3	/* SDRAM */
 #define B6_Trcd			0x1
 #define B6_SCAN			0x1	/* 9bit */
@@ -124,6 +127,17 @@
 #define Trc			0x3	/* 7clk */
 #define Tchr			0x2	/* 3clk */
 #define REFCNT			1113	/* period=15.6us, HCLK=60Mhz, (2048+1-15.6*60) */
+
+
+#if defined(CONFIG_S3C2440)
+#define Trp			0x2	/* 4clk */
+#define REFCNT		1012
+#else
+#define Trp			0x0	/* 2clk */
+#define REFCNT		0x0459
+#endif
+
+
 /**************************************/
 
 _TEXT_BASE:
@@ -162,6 +176,6 @@ SMRDATA:
     .word ((B6_MT<<15)+(B6_Trcd<<2)+(B6_SCAN))
     .word ((B7_MT<<15)+(B7_Trcd<<2)+(B7_SCAN))
     .word ((REFEN<<23)+(TREFMD<<22)+(Trp<<20)+(Trc<<18)+(Tchr<<16)+REFCNT)
-    .word 0x32
+    .word 0xb2
     .word 0x30
     .word 0x30

@@ -1,11 +1,15 @@
 /*
- * (C) Copyright 2002
+ * (C) Copyright 2012
  * Sysgo Real-Time Solutions, GmbH <www.elinos.com>
  * Marius Groeger <mgroeger@sysgo.de>
  * Gary Jennejohn <garyj@denx.de>
  * David Mueller <d.mueller@elsoft.ch>
  *
- * Configuation settings for the SAMSUNG SMDK2410 board.
+ * Modified for the friendly-arm mini2440 by
+ * wang_xi@anyka.com
+ * (C) Copyright 2012
+ *
+ * Configuation settings for the friendly-arm mini2440 board.
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -35,14 +39,19 @@
  */
 #define CONFIG_ARM920T		/* This is an ARM920T Core */
 #define CONFIG_S3C24X0		/* in a SAMSUNG S3C24x0-type SoC */
+#if 0
+#define CONFIG_S3C2440		/* specifically a SAMSUNG S3C2440 SoC */
+#define CONFIG_MINI2440		
+#else
 #define CONFIG_S3C2410		/* specifically a SAMSUNG S3C2410 SoC */
 #define CONFIG_SMDK2410		/* on a SAMSUNG SMDK2410 Board */
+#endif
 
 #define CONFIG_SYS_TEXT_BASE	0x0
 
 #define CONFIG_SYS_ARM_CACHE_WRITETHROUGH
 
-/* input clock of PLL (the SMDK2410 has 12MHz input clock) */
+/* input clock of PLL (the mini2440 has 12MHz input clock) */
 #define CONFIG_SYS_CLK_FREQ	12000000
 
 #undef CONFIG_USE_IRQ		/* we don't need IRQ/FIQ stuff */
@@ -54,15 +63,19 @@
 /*
  * Hardware drivers
  */
+#if 0
+/*mini2440 use DM9000EP which conected with nGCS4(0x20000000)*/
+#else
 #define CONFIG_CS8900		/* we have a CS8900 on-board */
 #define CONFIG_CS8900_BASE	0x19000300
 #define CONFIG_CS8900_BUS16	/* the Linux driver does accesses as shorts */
+#endif
 
 /*
  * select serial console configuration
  */
 #define CONFIG_S3C24X0_SERIAL
-#define CONFIG_SERIAL1		1	/* we use SERIAL 1 on SMDK2410 */
+#define CONFIG_SERIAL1		1	/* we use SERIAL 1 on mini2440 */
 
 /************************************************************
  * USB support (currently only works with D-cache off)
@@ -127,7 +140,7 @@
  * Miscellaneous configurable options
  */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
-#define CONFIG_SYS_PROMPT	"[MINI2440]#" //wx:comment:boot command line prefix string
+#define CONFIG_SYS_PROMPT	"[WangXi@MINI2440]#" //wx:comment:boot command line prefix string
 #define CONFIG_SYS_CBSIZE	256
 /* Print Buffer Size */
 #define CONFIG_SYS_PBSIZE	(CONFIG_SYS_CBSIZE + \
@@ -168,31 +181,40 @@
  * Physical Memory Map
  */
 #define CONFIG_NR_DRAM_BANKS	1          /* we have 1 bank of DRAM */
-#define PHYS_SDRAM_1		0x30000000 /* SDRAM Bank #1 ,wx:2440_sdram bank(nGCS6) is mapped to 0x30000000*/
-#define PHYS_SDRAM_1_SIZE	0x04000000 /* wx:32M X 2=64M  HY57V561620FTP*/
+//wx:Sdram HY57V561620FTP/K4S561632N is conected with nGCS6(0x30000000),and maped to its first bank.
+#define PHYS_SDRAM_1		0x30000000 /* SDRAM Bank #0 */
+#define PHYS_SDRAM_1_SIZE	0x04000000 /* wx:32M X 2=64M */
 
-//wx:comment:Norfalsh SST39VF1601 is conected NGCS0(0x00000000)
-#define PHYS_FLASH_1		0x00000000 /* Flash Bank #0 */ //wx:comment this will be a member of __cfi_flash_bank_addr
+//wx:Norfalsh SST39VF1601/S29AL016 is conected with NGCS0(0x00000000)
+//this will be a member of cfi_flash_bank_addr
+#define PHYS_FLASH_1		0x00000000 /* Flash Bank #0 */
 
 #define CONFIG_SYS_FLASH_BASE	PHYS_FLASH_1
 
 /*-----------------------------------------------------------------------
- * FLASH and environment organization
+ * NorFLASH and environment organization
  */
 
-//wx:comment: bleow is configure of NorFlash SST39VF1601
+/* wx:comment: bleow is the configure of NorFlash SST39VF1601(Supplier:Spansion)
+ *   a.Common Flash Interface(CFI) is an open specification,May be implemently
+ * by vendor:Inter,AMD,Sharp,Fujitsu.
+ *   b.Legacy Component:JEDEC Stardard, not CFI.
+ *   c.Spansion is a supplier which established by AMD and Fujistu, So this NorFlash
+ * Must support CFI. 
+ */
 #define CONFIG_SYS_FLASH_CFI
 #define CONFIG_FLASH_CFI_DRIVER
 #define CONFIG_SYS_CFI_FLASH_CONFIG_REGS {0xffff} //(0xffff is invalid),wx:replace: CONFIG_FLASH_CFI_LEGACY
-#define CONFIG_SYS_FLASH_LEGACY_1024Kx16          //(mini2440 NorFlah_SST 39VF1601)wx:replace: CONFIG_SYS_FLASH_LEGACY_512Kx16
+#define CONFIG_SYS_FLASH_LEGACY_1024Kx16          //(mini2440)wx:replace: CONFIG_SYS_FLASH_LEGACY_512Kx16
 #define CONFIG_FLASH_SHOW_PROGRESS	45
 
 #define CONFIG_SYS_MAX_FLASH_BANKS	1 ////wx:comment this will be the member count of all cfi flah( __cfi_flash_bank_addr)
 #define CONFIG_SYS_FLASH_BANKS_LIST     { CONFIG_SYS_FLASH_BASE }/*wx:comment this will be a member list,_as the return of_cfi_flash_bank_addr*/
 
- /*SST39VF1601, operator mode is block and sector, now we use sector mode,
-  * and 1 sector=2K word = 4K byte, so our flash is (2M / 4K) = 512
-  */
+/* If use SST39VF1601, operator mode is block and sector, when use sector mode,
+ * and 1 sector=2K word = 4K byte, so the sector is (2M / 4K) = 512
+ * If use S29AL016, May be 35 ????(uncertain??)
+ */
 #define CONFIG_SYS_MAX_FLASH_SECT	(35) //wx:replace:(19)
 
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
@@ -214,11 +236,17 @@
  * NAND configuration
  */
 #ifdef CONFIG_CMD_NAND
+#if 0
+#define CONFIG_NAND_S3C2440
+#define CONFIG_SYS_S3C2440_NAND_HWECC
+#else
 #define CONFIG_NAND_S3C2410
 #define CONFIG_SYS_S3C2410_NAND_HWECC
+#endif
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define NAND_MAX_CHIPS			1
-#define CONFIG_SYS_NAND_BASE		0x4E000000
+/*wx:s3c2400 NandFlash controler register base address,for r/w K9F2G08U0B*/
+#define CONFIG_SYS_NAND_BASE		0x4E000000 
 #endif
 
 /*
