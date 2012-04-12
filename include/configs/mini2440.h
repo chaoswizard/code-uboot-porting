@@ -39,15 +39,10 @@
  */
 #define CONFIG_ARM920T		/* This is an ARM920T Core */
 #define CONFIG_S3C24X0		/* in a SAMSUNG S3C24x0-type SoC */
-#if 0
 #define CONFIG_S3C2440		/* specifically a SAMSUNG S3C2440 SoC */
 #define CONFIG_MINI2440		
-#else
-#define CONFIG_S3C2410		/* specifically a SAMSUNG S3C2410 SoC */
-#define CONFIG_SMDK2410		/* on a SAMSUNG SMDK2410 Board */
-#endif
 
-#define CONFIG_SYS_TEXT_BASE	0x0
+#define CONFIG_SYS_TEXT_BASE	0x33000000
 
 #define CONFIG_SYS_ARM_CACHE_WRITETHROUGH
 
@@ -195,25 +190,25 @@
  * NorFLASH and environment organization
  */
 
-/* wx:comment: bleow is the configure of NorFlash SST39VF1601(Supplier:Spansion)
+/* wx:comment: bleow is the configure of NorFlash S29AL016(Supplier:Spansion)
  *   a.Common Flash Interface(CFI) is an open specification,May be implemently
  * by vendor:Inter,AMD,Sharp,Fujitsu.
  *   b.Legacy Component:JEDEC Stardard, not CFI.
- *   c.Spansion is a supplier which established by AMD and Fujistu, So this NorFlash
- * Must support CFI. 
+ *   c.Spansion is a supplier which established by AMD and Fujistu, This NorFlash
+ *  is CFI compliant and compatility JEDEC Standard. 
  */
 #define CONFIG_SYS_FLASH_CFI
 #define CONFIG_FLASH_CFI_DRIVER
-#define CONFIG_SYS_CFI_FLASH_CONFIG_REGS {0xffff} //(0xffff is invalid),wx:replace: CONFIG_FLASH_CFI_LEGACY
-#define CONFIG_SYS_FLASH_LEGACY_1024Kx16          //(mini2440)wx:replace: CONFIG_SYS_FLASH_LEGACY_512Kx16
+#define CONFIG_SYS_CFI_FLASH_CONFIG_REGS {0xffff} //wx:replace: CONFIG_FLASH_CFI_LEGACY
+#define CONFIG_SYS_FLASH_LEGACY_1024Kx16          //(1M x 16bit = 2M byte)
 #define CONFIG_FLASH_SHOW_PROGRESS	45
 
-#define CONFIG_SYS_MAX_FLASH_BANKS	1 ////wx:comment this will be the member count of all cfi flah( __cfi_flash_bank_addr)
+#define CONFIG_SYS_MAX_FLASH_BANKS	1 
 #define CONFIG_SYS_FLASH_BANKS_LIST     { CONFIG_SYS_FLASH_BASE }/*wx:comment this will be a member list,_as the return of_cfi_flash_bank_addr*/
 
 /* If use SST39VF1601, operator mode is block and sector, when use sector mode,
  * and 1 sector=2K word = 4K byte, so the sector is (2M / 4K) = 512
- * If use S29AL016, May be 35 ????(uncertain??)
+ * If use S29AL016, has 35 sectors (spec:P20),and 64Kbytes per sector.
  */
 #define CONFIG_SYS_MAX_FLASH_SECT	(35) //wx:replace:(19)
 
@@ -236,13 +231,8 @@
  * NAND configuration
  */
 #ifdef CONFIG_CMD_NAND
-#if 0
 #define CONFIG_NAND_S3C2440
 #define CONFIG_SYS_S3C2440_NAND_HWECC
-#else
-#define CONFIG_NAND_S3C2410
-#define CONFIG_SYS_S3C2410_NAND_HWECC
-#endif
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define NAND_MAX_CHIPS			1
 /*wx:s3c2400 NandFlash controler register base address,for r/w K9F2G08U0B*/

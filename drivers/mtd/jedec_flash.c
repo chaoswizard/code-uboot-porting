@@ -347,6 +347,25 @@ static const struct amd_flash_info jedec_table[] = {
 		}
 	},
 #endif
+#ifdef CONFIG_SYS_FLASH_LEGACY_1024Kx16  //wx:add for mini2440 NorFlash
+ {  
+	.mfr_id     = (u16)AMD_MANUFACT,  
+	.dev_id     = AM29LV160DB,  
+   	.name       = "WX S29AL016J",  
+   	.uaddr      = {  
+	  	[1] = MTD_UADDR_0x0555_0x02AA /* x16 wx:S29AL016J Spec:Chapter10.10*/  
+   	},  
+  	.DevSize    	 = SIZE_2MiB,  
+   	.CmdSet     	 = P_ID_AMD_STD,  
+   	.NumEraseRegions = 4,  
+   	.regions   	 = {  //wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Deviece
+		ERASEINFO((16<<10), 1),	/* 1  blocks */  
+		ERASEINFO(( 8<<10), 2), /* 2 blocks */  
+		ERASEINFO((32<<10), 1), /* 1 blocks */  
+	   	ERASEINFO((64<<10),31),/* 31  blocks */  
+   }  
+ },  
+#endif 
 };
 
 static inline void fill_info(flash_info_t *info, const struct amd_flash_info *jedec_entry, ulong base)

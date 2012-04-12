@@ -233,12 +233,16 @@ static void flash_make_cmd(flash_info_t *info, u32 cmd, void *cmdbuf)
 	uchar val;
 	uchar *cp = (uchar *) cmdbuf;
 
+    //wx:save u32 cmd to a little endian sequence buffer,such as Hi:|B3|B2|B1|B0|:Lo
+    //only fetch the \B0:B1(16 portwidth)\B0(8 portwidth)\B0:B1:B2:B3(32 portwidth)\ to a cp[]buffer.
 	for (i = info->portwidth; i > 0; i--){
 		cword_offset = (info->portwidth-i)%info->chipwidth;
+		//wx: if u32 cmd is little endian such as Hi:|B3|B2|B1|B0|:Lo
 #if defined(__LITTLE_ENDIAN) || defined(CONFIG_SYS_WRITE_SWAPPED_DATA)
 		cp_offset = info->portwidth - i;
 		val = *((uchar*)&cmd_le + cword_offset);
 #else
+		//wx: if u32 cmd is big endian such as Hi:|B0|B1|B2|B3|:Lo
 		cp_offset = i - 1;
 		val = *((uchar*)&cmd + sizeof(u32) - cword_offset - 1);
 #endif
@@ -1678,10 +1682,12 @@ static int flash_detect_legacy(phys_addr_t base, int banknum)
 
 			for (i = 0; i < sizeof(modes) / sizeof(modes[0]); i++) {
 				info->vendor = modes[i];
+				//wx:mini2440,norflash mapped to 0x00000000
 				info->start[0] =
 					(ulong)map_physmem(base,
 							   info->portwidth,
 							   MAP_NOCACHE);
+				//wx:try to read info by jedec address/cmd,
 				if (info->portwidth == FLASH_CFI_8BIT
 					&& info->interface == FLASH_CFI_X8X16) {
 					info->addr_unlock1 = 0x2AAA;
@@ -1695,6 +1701,7 @@ static int flash_detect_legacy(phys_addr_t base, int banknum)
 						info->manufacturer_id,
 						info->device_id,
 						info->device_id2);
+				//wx:check configure if matched with the deviece echo info
 				if (jedec_flash_match(info, info->start[0]))
 					break;
 				else
@@ -2164,6 +2171,8 @@ unsigned long flash_init (void)
 	unsigned long size = 0;
 	int i;
 
+	printf("wx_dbg:flashInit@%d_%s\n", __LINE__,  __FILE__);
+	
 #ifdef CONFIG_SYS_FLASH_PROTECTION
 	/* read environment from EEPROM */
 	char s[64];
@@ -2177,9 +2186,9 @@ unsigned long flash_init (void)
 		/* Optionally write flash configuration register */
 		cfi_flash_set_config_reg(cfi_flash_bank_addr(i),
 					 cfi_flash_config_reg(i));
-
+        //wx:try to detect by jedec standard cmd, if failed, means cfi
 		if (!flash_detect_legacy(cfi_flash_bank_addr(i), i))
-			flash_get_size(cfi_flash_bank_addr(i), i);
+			flash_get_size(cfi_flash_bank_addr(i), i);//use cfi cmd 
 		size += flash_info[i].size;
 		if (flash_info[i].flash_id == FLASH_UNKNOWN) {
 #ifndef CONFIG_SYS_FLASH_QUIET_TEST

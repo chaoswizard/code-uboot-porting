@@ -158,8 +158,8 @@ int board_eth_init(bd_t *bis)
  */
 ulong board_flash_get_legacy(ulong base, int banknum, flash_info_t *info)
 {
-	info->portwidth = FLASH_CFI_16BIT;
-	info->chipwidth = FLASH_CFI_BY16;
+	info->portwidth = FLASH_CFI_16BIT; // wx:8 x 2(portwidth)
+	info->chipwidth = FLASH_CFI_BY16;  // wx:8 x 2(chipwidth)
 	info->interface = FLASH_CFI_X16;
 	return 1;
 }
