@@ -42,6 +42,8 @@
 #define CONFIG_S3C2440		/* specifically a SAMSUNG S3C2440 SoC */
 #define CONFIG_MINI2440		
 
+#define CONFIG_SKIP_LOWLEVEL_INIT  /*wx:if run on ram, must define it*/
+
 #define CONFIG_SYS_TEXT_BASE	0x33000000
 
 #define CONFIG_SYS_ARM_CACHE_WRITETHROUGH
