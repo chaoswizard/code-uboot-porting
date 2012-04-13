@@ -34,6 +34,7 @@ int nand_curr_device = -1;
 nand_info_t nand_info[CONFIG_SYS_MAX_NAND_DEVICE];
 
 static struct nand_chip nand_chip[CONFIG_SYS_MAX_NAND_DEVICE];
+//wx:nand controler base register address
 static ulong base_address[CONFIG_SYS_MAX_NAND_DEVICE] = CONFIG_SYS_NAND_BASE_LIST;
 
 static const char default_nand_name[] = "nand";

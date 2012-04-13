@@ -1,0 +1,22 @@
+git://www.denx.de/git/u-boot.git
+
+
+=================== remove same files===========================================
+diff -r -s -q tek_uboot/ u-boot-2010.03/ \
+| grep "identical" | sed -n 's/^Files \(.*\) and \(.*\) are identical/\1 \2/p' |\
+xargs -t rm -rf 
+
+find ./tek_uboot/ ./u-boot-2010.03/ -type d -empty | xargs -exec rmdir -p
+================================================================================
+
+======================remove files in a list record file(del_file_list)=========
+
+
+sed -n 's/^\([^:\(\)]\+\.h\).*$/\.\/include\/configs\/\1/p' del_file_list1  |tr '[A-Z]' '[a-z]' > del_file_list
+
+//MUST remove reverse files form this list first
+sed -n 's/^\([^:\(\)]\+\.h\).*$/\1/p' del_file_list|xargs -t rm -f
+
+
+
+

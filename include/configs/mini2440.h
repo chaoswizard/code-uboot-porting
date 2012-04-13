@@ -200,7 +200,7 @@
  *  is CFI compliant and compatility JEDEC Standard. 
  */
 #define CONFIG_SYS_FLASH_CFI
-#define CONFIG_FLASH_CFI_DRIVER
+#define CONFIG_FLASH_CFI_DRIVER//wx: enable compile cfi_flash.o
 #define CONFIG_SYS_CFI_FLASH_CONFIG_REGS {0xffff} //wx:replace: CONFIG_FLASH_CFI_LEGACY
 #define CONFIG_SYS_FLASH_LEGACY_1024Kx16          //(1M x 16bit = 2M byte)
 #define CONFIG_FLASH_SHOW_PROGRESS	45
@@ -236,7 +236,7 @@
 #define CONFIG_NAND_S3C2440
 #define CONFIG_SYS_S3C2440_NAND_HWECC
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
-#define NAND_MAX_CHIPS			1
+#define NAND_MAX_CHIPS			1 //wx: all nand chips count
 /*wx:s3c2400 NandFlash controler register base address,for r/w K9F2G08U0B*/
 #define CONFIG_SYS_NAND_BASE		0x4E000000 
 #endif
