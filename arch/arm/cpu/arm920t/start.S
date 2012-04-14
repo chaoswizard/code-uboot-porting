@@ -300,8 +300,8 @@ relocate_code:
 stack_setup:
 	mov	sp, r4
 
-	adr	r0, _start
-	cmp	r0, r6
+	adr	r0, _start      /* from */
+	cmp	r0, r6          /* if code is in ram */
 	beq	clear_bss		/* skip relocation */
 	mov	r1, r6			/* r1 <- scratch for copy_loop */
 	ldr	r3, _bss_start_ofs

@@ -354,11 +354,15 @@ static const struct amd_flash_info jedec_table[] = {
    	.name       = "WX S29AL016J",  
    	.uaddr      = {  
 	  	[1] = MTD_UADDR_0x0555_0x02AA /* x16 wx:S29AL016J Spec:Chapter10.10*/  
-   	},  
+   	},  //wx: s29al016j when byte mode is  aaa,555 and word mode is 555, 2aa 
   	.DevSize    	 = SIZE_2MiB,  
    	.CmdSet     	 = P_ID_AMD_STD,  
    	.NumEraseRegions = 4,  
-   	.regions   	 = {  //wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Deviece
+   	.regions   	 = {  
+   	 /*wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Deviece
+     *  S29AL016J70TFI02 is a bottom boot device(C6.1P14), therefor the low address is
+     *  placed the boot sector(16K)
+   	 */
 		ERASEINFO((16<<10), 1),	/* 1  blocks */  
 		ERASEINFO(( 8<<10), 2), /* 2 blocks */  
 		ERASEINFO((32<<10), 1), /* 1 blocks */  

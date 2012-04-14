@@ -158,8 +158,12 @@ int board_eth_init(bd_t *bis)
  */
 ulong board_flash_get_legacy(ulong base, int banknum, flash_info_t *info)
 {
-	info->portwidth = FLASH_CFI_16BIT; // wx:8 x 2(portwidth)
-	info->chipwidth = FLASH_CFI_BY16;  // wx:8 x 2(chipwidth)
+	/*wx:8 x 2(portwidth) (S29AL160J BYTE#(PIN 47) is 1, hense, 
+	   we select word(16bit) mode)*/
+	info->portwidth = FLASH_CFI_16BIT; 
+	/*wx:8 x 2 = 16(chipwidth)(mini2440,OM[1] PIN is 0, OM[0] PIN is 1, hense
+	   we select 16bit mode(bank0 data width mode),*/
+	info->chipwidth = FLASH_CFI_BY16;  
 	info->interface = FLASH_CFI_X16;
 	return 1;
 }
