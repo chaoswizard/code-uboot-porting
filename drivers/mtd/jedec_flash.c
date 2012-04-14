@@ -359,9 +359,11 @@ static const struct amd_flash_info jedec_table[] = {
    	.CmdSet     	 = P_ID_AMD_STD,  
    	.NumEraseRegions = 4,  
    	.regions   	 = {  
-   	 /*wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Deviece
+   	 /*wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Device
      *  S29AL016J70TFI02 is a bottom boot device(C6.1P14), therefor the low address is
-     *  placed the boot sector(16K)
+     *  placed the boot sector(16K,which is smaller than uniform sector)
+     * The total region count need not equal the device sector count, just
+     * only mutiply with the device count of the real.
    	 */
 		ERASEINFO((16<<10), 1),	/* 1  blocks */  
 		ERASEINFO(( 8<<10), 2), /* 2 blocks */  
@@ -447,7 +449,7 @@ int jedec_flash_match(flash_info_t *info, ulong base)
 	int ret = 0;
 	int i;
 	ulong mask = 0xFFFF;
-	if (info->chipwidth == 1)
+	if (info->chipwidth == FLASH_CFI_8BIT)
 		mask = 0xFF;
 
 	for (i = 0; i < ARRAY_SIZE(jedec_table); i++) {

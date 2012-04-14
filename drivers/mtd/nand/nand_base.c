@@ -81,6 +81,17 @@ static struct nand_ecclayout nand_oob_16 = {
 		 . length = 8}}
 };
 
+#ifdef CONFIG_S3C2440_NAND_HWECC
+static struct nand_ecclayout nand_oob_64 = {
+	.eccbytes = 4,
+	.eccpos = {
+		    60, 61, 62, 63},
+	.oobfree = {
+		{.offset = 2,
+		 .length = 58}}
+};
+
+#else
 static struct nand_ecclayout nand_oob_64 = {
 	.eccbytes = 24,
 	.eccpos = {
@@ -91,6 +102,8 @@ static struct nand_ecclayout nand_oob_64 = {
 		{.offset = 2,
 		 .length = 38}}
 };
+
+#endif
 
 static struct nand_ecclayout nand_oob_128 = {
 	.eccbytes = 48,

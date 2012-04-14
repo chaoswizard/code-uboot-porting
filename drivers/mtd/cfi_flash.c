@@ -209,7 +209,7 @@ unsigned long flash_sector_size(flash_info_t *info, flash_sect_t sect)
 static inline void *
 flash_map (flash_info_t * info, flash_sect_t sect, uint offset)
 {
-	unsigned int byte_offset = offset * info->portwidth;
+	unsigned int byte_offset = offset * info->portwidth;//wx: if 16bit, the address will shift left 1 bit
 
 	return (void *)(info->start[sect] + byte_offset);
 }
