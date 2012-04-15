@@ -127,7 +127,7 @@
 #define TREFMD			0x0	/* CBR(CAS before RAS)/Auto refresh */
 #define Trp			    0x2	/* 20ns =>4clk */
 #define Trc			    0x3	/* 65~70ns =>7clk */
-#define Tchr			0x2	/* sdram neednot this item */
+#define Tchr			0x2	/* 3clk, wx:sdram neednot this item */
 #define REFCNT			1113	/* period=15.6us, HCLK=60Mhz, (2048+1-15.6*60) */
 
 

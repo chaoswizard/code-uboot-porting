@@ -100,10 +100,19 @@ int board_early_init_f(void)
 
 	/* set up the I/O ports */
 	writel(0x007FFFFF, &gpio->gpacon);
-	writel(0x00044555, &gpio->gpbcon);
-	writel(0x000007FF, &gpio->gpbup);
-	writel(0xAAAAAAAA, &gpio->gpccon);
+   /* wx: GPB10 and GPB9 Config as Extrenal DMA CON, lookup CON5 PIN13,14
+    * of Mini2440 shema, GPB0 output 0(Speaker),GPB1 input 1, other output 1)
+    */
+	writel(0x00295551, &gpio->gpbcon);
+	writel(0x000007FE, &gpio->gpbup);
+
+	/* wx: GPC5 set as gpio output , other for lcd control,
+	 * GPC5 output as 0(usb disable, connected to usb D+)
+	 */
+	writel(0xAAAAA6AA, &gpio->gpccon);
+	writel(readl(&gpio->gpcdat)&(~(1<<5)),&gpio->gpcdat);
 	writel(0x0000FFFF, &gpio->gpcup);
+	
 	writel(0xAAAAAAAA, &gpio->gpdcon);
 	writel(0x0000FFFF, &gpio->gpdup);
 	writel(0xAAAAAAAA, &gpio->gpecon);
