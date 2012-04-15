@@ -351,7 +351,7 @@ static const struct amd_flash_info jedec_table[] = {
  {  
 	.mfr_id     = (u16)AMD_MANUFACT,  
 	.dev_id     = AM29LV160DB,  
-   	.name       = "WX S29AL016J",  
+   	.name       = "S29AL016J",  
    	.uaddr      = {  
 	  	[1] = MTD_UADDR_0x0555_0x02AA /* x16 wx:S29AL016J Spec:Chapter10.10*/  
    	},  //wx: s29al016j when byte mode is  aaa,555 and word mode is 555, 2aa 

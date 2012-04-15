@@ -2597,13 +2597,19 @@ static const struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 		       *maf_id, *dev_id, tmp_manf, tmp_id);
 		return ERR_PTR(-ENODEV);
 	}
+	
+	debug("NandTbl:0x%x, TypeTbl:0x%x.\n", nand_flash_ids, type);
 
 	if (!type)
 		type = nand_flash_ids;
 
-	for (; type->name != NULL; type++)
-		if (*dev_id == type->id)
+	for (; type->name != NULL; type++) {
+		debug("lookup:%x->%s\n", type->id, type->name);
+		if (*dev_id == type->id) {
+			debug("lookup:Ok!!!\n");
 			break;
+		}
+	}
 
 	if (!type->name) {
 		/* supress warning if there is no nand */
@@ -2614,12 +2620,15 @@ static const struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 				__func__, *maf_id, *dev_id);
 		return ERR_PTR(-ENODEV);
 	}
+	
+	debug("Item:0x%x[%d].\n NF Name: %s(%s)"
+	      " Vendor ID: 0x%02x, Chip ID: 0x%02x:0x%02x Size: %d M.\n",
+	        type, (type - nand_flash_ids)/sizeof(struct nand_flash_dev),
+	        mtd->name, type->name, *maf_id, *dev_id, type->id, type->chipsize);
 
 	if (!mtd->name)
 		mtd->name = type->name;
 		
-	printk(KERN_DEBUG "NF Name: %s Vendor ID: 0x%02x, Chip ID: 0x%02x Size: %d M.\n", 
-	        mtd->name, *maf_id, *dev_id, type->chipsize);
 
 	chip->chipsize = (uint64_t)type->chipsize << 20;
 	chip->onfi_version = 0;

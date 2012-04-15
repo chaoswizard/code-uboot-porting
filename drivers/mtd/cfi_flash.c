@@ -1973,7 +1973,7 @@ ulong flash_get_size (phys_addr_t base, int banknum)
 			break;
 		}
 
-		debug ("manufacturer is %d\n", info->vendor);
+		debug ("manufacturer is %d, Name:%s\n", info->vendor, info->name);
 		debug ("manufacturer id is 0x%x\n", info->manufacturer_id);
 		debug ("device id is 0x%x\n", info->device_id);
 		debug ("device id2 is 0x%x\n", info->device_id2);
