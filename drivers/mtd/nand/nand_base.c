@@ -2617,6 +2617,9 @@ static const struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 
 	if (!mtd->name)
 		mtd->name = type->name;
+		
+	printk(KERN_DEBUG "NF Name: %s Vendor ID: 0x%02x, Chip ID: 0x%02x Size: %d M.\n", 
+	        mtd->name, *maf_id, *dev_id, type->chipsize);
 
 	chip->chipsize = (uint64_t)type->chipsize << 20;
 	chip->onfi_version = 0;

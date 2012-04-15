@@ -234,11 +234,14 @@
  */
 #ifdef CONFIG_CMD_NAND
 #define CONFIG_NAND_S3C2440
-//#define CONFIG_S3C2440_NAND_HWECC
+#define CONFIG_S3C2440_NAND_HWECC
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define NAND_MAX_CHIPS			1 //wx: all nand chips count
 /*wx:s3c2400 NandFlash controler register base address,for r/w K9F2G08U0B*/
 #define CONFIG_SYS_NAND_BASE		0x4E000000 
+#define CONFIG_SYS_NAND_ECCSIZE		2048
+#define	CONFIG_SYS_NAND_ECCBYTES	4
+#define CONFIG_MTD_NAND_VERIFY_WRITE    1
 #endif
 
 /*

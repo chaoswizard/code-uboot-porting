@@ -2171,7 +2171,6 @@ unsigned long flash_init (void)
 	unsigned long size = 0;
 	int i;
 
-	printf("wx_dbg:flashInit@%d_%s\n", __LINE__,  __FILE__);
 	
 #ifdef CONFIG_SYS_FLASH_PROTECTION
 	/* read environment from EEPROM */
