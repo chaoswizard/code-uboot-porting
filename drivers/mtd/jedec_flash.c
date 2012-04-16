@@ -402,7 +402,7 @@ static inline void fill_info(flash_info_t *info, const struct amd_flash_info *je
 		uaddr_idx = jedec_entry->uaddr[0];
 		break;
 	case FLASH_CFI_16BIT:
-		uaddr_idx = jedec_entry->uaddr[1];
+		uaddr_idx = jedec_entry->uaddr[1]; /* unlock address index */
 		break;
 	case FLASH_CFI_32BIT:
 		uaddr_idx = jedec_entry->uaddr[2];
