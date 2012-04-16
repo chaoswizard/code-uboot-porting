@@ -191,8 +191,8 @@ copyex:
 
 # if defined(CONFIG_S3C2440)
 #define CLK_CTL_BASE   	(0x4C000000)	
-#define MDIV_405	    (0x21)
-#define PSDIV_405  	    (0x7f << 12	)
+#define MDIV_405	    (0x7f << 12	)
+#define PSDIV_405  	    (0x21)
 
 	/*	
 	 * FCLK:HCLK:PCLK = 1:4:8  
