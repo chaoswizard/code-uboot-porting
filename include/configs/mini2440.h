@@ -62,7 +62,7 @@
  */
 #if 0
 /*mini2440 use DM9000EP which conected with nGCS4(0x20000000)*/
-#else
+//#else
 #define CONFIG_CS8900		/* we have a CS8900 on-board */
 #define CONFIG_CS8900_BASE	0x19000300
 #define CONFIG_CS8900_BUS16	/* the Linux driver does accesses as shorts */
