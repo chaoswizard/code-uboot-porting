@@ -56,7 +56,7 @@
 
 /* in the early stage of NAND flash booting, printf() is not available */
 #define printf(fmt, args...)
-
+#if 0
 static void nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 {
 	int i;
@@ -65,6 +65,7 @@ static void nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 	for (i = 0; i < len; i++)
 		buf[i] = readb(this->IO_ADDR_R);
 }
+#endif
 #endif
 
 static void s3c2440_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ctrl)

@@ -174,5 +174,5 @@ SMRDATA:
     *     therefor BK76MAP bit[2:0] = 001, means 64M byte.
     */
 /* BANKSIZE */    .word 0xb1 /* enable burst operation */
-  .word 0x30
-    .word 0x30
+/* MRSRB6   */    .word 0x30
+/* MRSRB7   */    .word 0x30

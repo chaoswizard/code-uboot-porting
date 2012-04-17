@@ -372,8 +372,8 @@ clbss_l:str	r2, [r0]		/* clear loop...		    */
 	cmp	r0, r1
 	bne	clbss_l
 
-	bl coloured_LED_init
-	bl red_led_on
+	//bl coloured_LED_init
+	//bl red_led_on
 #endif
 
 /*

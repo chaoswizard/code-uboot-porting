@@ -42,9 +42,18 @@
 #define CONFIG_S3C2440		/* specifically a SAMSUNG S3C2440 SoC */
 #define CONFIG_MINI2440		
 
-#define CONFIG_SKIP_LOWLEVEL_INIT  /*wx:if run on ram, must define it*/
+/*wx:close for nandboot,if run on ram, must open it*/
+#define CONFIG_SKIP_LOWLEVEL_INIT  
 
+//wx: if boot code size is larger than 4K, need open this to reload ????
+//#define CONFIG_NAND_SPL  
+
+//wx:test, if run in ram, loacte to top 48M/64M
+#ifdef CONFIG_SKIP_LOWLEVEL_INIT
 #define CONFIG_SYS_TEXT_BASE	0x33000000
+#else
+#define CONFIG_SYS_TEXT_BASE	0x30000000
+#endif
 
 #define CONFIG_SYS_ARM_CACHE_WRITETHROUGH
 
@@ -214,9 +223,19 @@
  */
 #define CONFIG_SYS_MAX_FLASH_SECT	(35) //wx:replace:(19)
 
+#define CONFIG_ENV_IS_IN_NAND //CONFIG_ENV_IS_IN_FLASH//
+
+#if defined(CONFIG_ENV_IS_IN_FLASH)
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
-#define CONFIG_ENV_IS_IN_FLASH
-#define CONFIG_ENV_SIZE			0x10000
+#define CONFIG_ENV_SIZE			 (0x10000)
+#elif defined(CONFIG_ENV_IS_IN_NAND)
+#define CONFIG_ENV_OFFSET        (0x200000)//wx:add for nand boot)
+#define CONFIG_ENV_SIZE			 (64*2048)//64 pages
+#else
+#error where save environments?
+#endif
+
+
 /* allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
 
@@ -234,11 +253,13 @@
  */
 #ifdef CONFIG_CMD_NAND
 #define CONFIG_NAND_S3C2440
-#define CONFIG_S3C2440_NAND_HWECC
+
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define NAND_MAX_CHIPS			1 //wx: all nand chips count
 /*wx:s3c2400 NandFlash controler register base address,for r/w K9F2G08U0B*/
 #define CONFIG_SYS_NAND_BASE		0x4E000000 
+
+#define CONFIG_S3C2440_NAND_HWECC
 #define CONFIG_SYS_NAND_ECCSIZE		2048
 #define	CONFIG_SYS_NAND_ECCBYTES	4
 #define CONFIG_MTD_NAND_VERIFY_WRITE    1
