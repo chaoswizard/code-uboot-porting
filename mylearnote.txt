@@ -17,6 +17,8 @@ sed -n 's/^\([^:\(\)]\+\.h\).*$/\.\/include\/configs\/\1/p' del_file_list1  |tr 
 //MUST remove reverse files form this list first
 sed -n 's/^\([^:\(\)]\+\.h\).*$/\1/p' del_file_list|xargs -t rm -f
 
-
+//
+grep -H -R "aabbcc" /home      
+显示home下面文件里面有aabbcc的文件
 
 
