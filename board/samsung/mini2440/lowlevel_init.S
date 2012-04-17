@@ -176,3 +176,4 @@ SMRDATA:
 /* BANKSIZE */    .word 0xb1 /* enable burst operation */
 /* MRSRB6   */    .word 0x30
 /* MRSRB7   */    .word 0x30
+

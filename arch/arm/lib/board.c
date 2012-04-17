@@ -77,7 +77,7 @@ extern void dataflash_print_info(void);
     defined(CONFIG_SOFT_I2C)
 #include <i2c.h>
 #endif
-
+#if 0
 /************************************************************************
  * Coloured LED functionality
  ************************************************************************
@@ -102,7 +102,7 @@ inline void __blue_led_on(void) {}
 void blue_led_on(void) __attribute__((weak, alias("__blue_led_on")));
 inline void __blue_led_off(void) {}
 void blue_led_off(void) __attribute__((weak, alias("__blue_led_off")));
-
+#endif
 /*
  ************************************************************************
  * Init Utilities							*
