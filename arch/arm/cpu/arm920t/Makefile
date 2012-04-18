@@ -25,14 +25,16 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(CPU).o
 
-START	= start.o
-
-COBJS-y	+= cpu.o
+START	= start.o  
+COBJS-y	+= cpu.o 
 COBJS-$(CONFIG_USE_IRQ)	+= interrupts.o
 
-SRCS	:= $(START:.o=.S) $(SOBJS:.o=.S) $(COBJS-y:.o=.c)
+SRCS	:= $(START:.o=.S) $(SOBJS:.o=.S) $(COBJS-y:.o=.c) 
 OBJS	:= $(addprefix $(obj),$(COBJS-y) $(SOBJS))
 START	:= $(addprefix $(obj),$(START))
+
+SRCS    += $(TOPDIR)/board/samsung/mini2440/lowlevel_init.S
+OBJS	+= $(TOPDIR)/board/samsung/mini2440/lowlevel_init.o
 
 all:	$(obj).depend $(START) $(LIB)
 
