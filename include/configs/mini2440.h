@@ -71,6 +71,7 @@
  */
 #if 0
 /*mini2440 use DM9000EP which conected with nGCS4(0x20000000)*/
+
 //#else
 #define CONFIG_CS8900		/* we have a CS8900 on-board */
 #define CONFIG_CS8900_BASE	0x19000300
@@ -229,7 +230,7 @@
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
 #define CONFIG_ENV_SIZE			 (0x10000)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET        (0x200000)//wx:add for nand boot)
+#define CONFIG_ENV_OFFSET        (0x800000)//wx:add for nand boot)
 #define CONFIG_ENV_SIZE			 (64*2048)//64 pages
 #else
 #error where save environments?

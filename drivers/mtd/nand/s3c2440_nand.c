@@ -56,7 +56,7 @@
 
 /* in the early stage of NAND flash booting, printf() is not available */
 #define printf(fmt, args...)
-#if 0
+
 static void nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 {
 	int i;
@@ -65,7 +65,6 @@ static void nand_read_buf(struct mtd_info *mtd, u_char *buf, int len)
 	for (i = 0; i < len; i++)
 		buf[i] = readb(this->IO_ADDR_R);
 }
-#endif
 #endif
 
 static void s3c2440_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ctrl)
@@ -132,12 +131,13 @@ static int s3c2440_nand_calculate_ecc(struct mtd_info *mtd, const u_char *dat,
 
 	writel(readl(&nand->nfcont) | S3C2440_NFCONT_MECCL, &nand->nfcont);
 	mecc0 = readl(&nand->nfmecc0);
+	
 	ecc_code[0] = mecc0 & 0xff;
 	ecc_code[1] = (mecc0 >> 8)  & 0xff;
 	ecc_code[2] = (mecc0 >> 16) & 0xff;
 	ecc_code[3] = (mecc0 >> 24) & 0xff;
-	debug("s3c2440_nand_calculate_hwecc(%p,): 0x%02x 0x%02x 0x%02x\n",
-	       mtd , ecc_code[0], ecc_code[1], ecc_code[2]);
+	debug("s3c2440_nand_calculate_hwecc(%p,): 0x%02x 0x%02x 0x%02x 0x%02x\n",
+	       mtd , ecc_code[0], ecc_code[1], ecc_code[2], ecc_code[3]);
 
 	return 0;
 }

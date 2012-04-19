@@ -100,7 +100,7 @@ int board_early_init_f(void)
 
 	/* set up the I/O ports */
 	writel(0x007FFFFF, &gpio->gpacon);
-   /* wx: GPB10 and GPB9 Config as Extrenal DMA CON, lookup CON5 PIN13,14
+   /* wx: GPB10 and GPB9 Config as External DMA CON, lookup CON5 PIN13,14
     * of Mini2440 shema, GPB0 output 0(Speaker),GPB1 input 1, other output 1)
     */
 	writel(0x00295551, &gpio->gpbcon);

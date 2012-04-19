@@ -348,29 +348,47 @@ static const struct amd_flash_info jedec_table[] = {
 	},
 #endif
 #ifdef CONFIG_SYS_FLASH_LEGACY_1024Kx16  //wx:add for mini2440 NorFlash
- {  
-	.mfr_id     = (u16)AMD_MANUFACT,  
-	.dev_id     = AM29LV160DB,  
-   	.name       = "S29AL016J",  
-   	.uaddr      = {  
-	  	[1] = MTD_UADDR_0x0555_0x02AA /* x16 wx:S29AL016J Spec:Chapter10.10*/  
-   	},  //wx: s29al016j when byte mode is  aaa,555 and word mode is 555, 2aa 
-  	.DevSize    	 = SIZE_2MiB,  
-   	.CmdSet     	 = P_ID_AMD_STD,  
-   	.NumEraseRegions = 4,  
-   	.regions   	 = {  
-   	 /*wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Device
-     *  S29AL016J70TFI02 is a bottom boot device(C6.1P14), therefor the low address is
-     *  placed the boot sector(16K,which is smaller than uniform sector)
-     * The total region count need not equal the device sector count, just
-     * only mutiply with the device count of the real.
-   	 */
-		ERASEINFO((16<<10), 1),	/* 1  blocks */  
-		ERASEINFO(( 8<<10), 2), /* 2 blocks */  
-		ERASEINFO((32<<10), 1), /* 1 blocks */  
-	   	ERASEINFO((64<<10),31),/* 31  blocks */  
-   }  
- },  
+	{  
+		.mfr_id     = (u16)AMD_MANUFACT,  
+		.dev_id     = AM29LV160DB,  
+		.name       = "S29AL016J",  
+		.uaddr      = {  
+			[1] = MTD_UADDR_0x0555_0x02AA /* x16 wx:S29AL016J Spec:Chapter10.10*/  
+		},  //wx: s29al016j when byte mode is  aaa,555 and word mode is 555, 2aa 
+		.DevSize    	 = SIZE_2MiB,  
+		.CmdSet     	 = P_ID_AMD_STD,  
+		.NumEraseRegions = 4,  
+		.regions   	 = {  
+			 /*wx: for init virtual start address  Spec: Table 7.4 Bottom Boot Device
+		 *  S29AL016J70TFI02 is a bottom boot device(C6.1P14), therefor the low address is
+		 *  placed the boot sector(16K,which is smaller than uniform sector)
+		 * The total region count need not equal the device sector count, just
+		 * only mutiply with the device count of the real.
+			 */
+			ERASEINFO((16<<10), 1),	/* 1  blocks */  
+			ERASEINFO(( 8<<10), 2), /* 2 blocks */  
+			ERASEINFO((32<<10), 1), /* 1 blocks */  
+		   	ERASEINFO((64<<10),31),/* 31  blocks */  
+		}  
+	},  
+
+	{
+		.mfr_id		= (u16)SST_MANUFACT,
+		.dev_id		= SST39VF1601,
+		.name		= "SST 39VF1601",
+		.uaddr		= {
+			[1] = MTD_UADDR_0x5555_0x2AAA /* x16 */
+		},
+		.DevSize	= SIZE_2MiB,
+		.CmdSet		= P_ID_AMD_STD,
+		.NumEraseRegions= 4,
+		.regions	= {
+			ERASEINFO(0x10000,6),
+			ERASEINFO(0x10000,10),
+			ERASEINFO(0x10000,15),
+			ERASEINFO(0x10000,1),
+		}
+	},
 #endif 
 };
 
@@ -449,7 +467,7 @@ int jedec_flash_match(flash_info_t *info, ulong base)
 	int ret = 0;
 	int i;
 	ulong mask = 0xFFFF;
-	if (info->chipwidth == FLASH_CFI_8BIT)
+	if (info->chipwidth == 1)
 		mask = 0xFF;
 
 	for (i = 0; i < ARRAY_SIZE(jedec_table); i++) {
