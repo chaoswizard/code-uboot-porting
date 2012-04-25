@@ -84,7 +84,7 @@ static void s3c2440_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ctrl)
 		if (!(ctrl & NAND_CLE))
 			IO_ADDR_W |= S3C2440_ADDR_NCLE;
 		/* wx: is there exist a case (CLE | ALE)?
-        * i think that does not exit.
+        * i think that does not exist.
         * because here use 'addr_w |= flag'  
         
 		 */	
@@ -226,7 +226,7 @@ int board_nand_init(struct nand_chip *nand)
 	cfg = S3C2440_NFCONT_SECCL;
     cfg |= S3C2440_NFCONT_MECCL;
 	cfg |= S3C2440_NFCONT_MODE;
-    writel(cfg,&nand_reg->nfcont);
+    writel(cfg, &nand_reg->nfcont);
 	
 	/* initialize nand_chip data structure */
 	nand->IO_ADDR_R = (void *)&nand_reg->nfdata;

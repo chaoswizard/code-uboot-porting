@@ -42,17 +42,24 @@
 #define CONFIG_S3C2440		/* specifically a SAMSUNG S3C2440 SoC */
 #define CONFIG_MINI2440		
 
-/*wx:close for nandboot,if run on ram, must open it*/
-#define CONFIG_SKIP_LOWLEVEL_INIT  
 
 //wx: if boot code size is larger than 4K, need open this to reload ????
 //#define CONFIG_NAND_SPL  
+//#define CONFIG_NAND_BOOT 
+#define CONFIG_BOOT_INNER_SRAM_SIZE     (4<<10)
 
-//wx:test, if run in ram, loacte to top 48M/64M
-#ifdef CONFIG_SKIP_LOWLEVEL_INIT
-#define CONFIG_SYS_TEXT_BASE	0x33000000
+
+#ifdef CONFIG_NAND_BOOT
+#define CONFIG_SYS_TEXT_BASE	        0x30000000
+//wx: steppingstone zone maped addr, refrence of S3c2440 spec,C6-6
+#define CONFIG_BOOT_INNER_SRAM_BASE     0x00000000
 #else
-#define CONFIG_SYS_TEXT_BASE	0x30000000
+/*wx:close for nandboot,if run on ram, must open it*/
+#define CONFIG_SKIP_LOWLEVEL_INIT  
+//wx: if run in ram, relocate to top 48M/64M
+#define CONFIG_SYS_TEXT_BASE	       0x33000000
+#define CONFIG_NAND_BOOT_TEST          0x30000000
+#define CONFIG_BOOT_INNER_SRAM_BASE    0x40000000
 #endif
 
 #define CONFIG_SYS_ARM_CACHE_WRITETHROUGH
@@ -224,13 +231,19 @@
  */
 #define CONFIG_SYS_MAX_FLASH_SECT	(35) //wx:replace:(19)
 
+
+#if defined (CONFIG_NAND_BOOT)
 #define CONFIG_ENV_IS_IN_NAND //CONFIG_ENV_IS_IN_FLASH//
+#else
+#define CONFIG_ENV_IS_IN_FLASH
+#endif
+
 
 #if defined(CONFIG_ENV_IS_IN_FLASH)
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
 #define CONFIG_ENV_SIZE			 (0x10000)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET        (0x800000)//wx:add for nand boot)
+#define CONFIG_ENV_OFFSET      	         (0x800000)//wx:add for nand boot)
 #define CONFIG_ENV_SIZE			 (64*2048)//64 pages
 #else
 #error where save environments?
@@ -285,11 +298,13 @@
 //  wx:comment: start.s jump to c function use bleow stack address(must init before call c function)
 // the GENERATED_GBL_DATA_SIZA(global_data) is create by kbulid tools as in asm-offsets.c
 //---------------------------------
-//|(nGCS6)=0x30000000  
-//|       +SP_SIZE ?(dymatic size, decide by gd size)     
-//|       =INIT_SP_ADDR | // up is stack, down is system global data
-//|       +sizeof(struct global_data) = gd
 //|   (4K)=0x30001000
+//|       +sizeof(struct global_data) = gd
+//|       =INIT_SP_ADDR | // up is stack, down is system global data
+//|       +SP_SIZE ?(dymatic size, decide by gd size)     
+//|--------------------------------
+//|      boot code
+//|------- (nGCS6)=0x30000000  
 //---------------------------------  
 #define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_SYS_SDRAM_BASE + 0x1000 - \
 				GENERATED_GBL_DATA_SIZE)

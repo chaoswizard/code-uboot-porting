@@ -239,24 +239,38 @@ copyex:
 	bl	cpu_init_crit
 #endif
 
+#ifdef CONFIG_NAND_BOOT
+	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
+	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
+	@ load U-Boot to RAM
+	bl	nandboot_load_img
+	tst r0, #0x0
+    	read_err_dead:
+	bne  read_err_dead
+#endif
+
+
 /* Set stackpointer in internal RAM to call board_init_f */
 /*
  wx:comment: start.s jump to c function need useed a stack(CONFIG_SYS_INIT_SP_ADDR)
  (this must inited before call any c function)
  the GENERATED_GBL_DATA_SIZE(global_data) is create by kbulid tools as in asm-offsets.c
  ---------------------------------
- |(nGCS6)=0x30000000  
- |       +SP_SIZE ?(dymatic size, decide by gd size)     
- |       =INIT_SP_ADDR | // up is stack, down is system global data(is used in board_init_f)
- |       +sizeof(struct global_data) = gd
  |   (4K)=0x30001000
+ | 	  +sizeof(struct global_data) = gd
+ | 	  =INIT_SP_ADDR | // up is stack, down is system global data
+ | 	  +SP_SIZE ?(dymatic size, decide by gd size)	  
+ |--------------------------------
+ | 	 boot code
+ |------=0x30000000  
  ---------------------------------  
 */
 call_board_init_f:
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
 	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
-	ldr	r0,=0x00000000
+	ldr r0,=0x00000000
 	bl	board_init_f
+
 
 /*------------------------------------------------------------------------------*/
 	/* wx:comment:layout relocate
@@ -292,13 +306,16 @@ call_board_init_f:
  */
 	.globl	relocate_code
 relocate_code:
-	mov	r4, r0	/* save addr_sp */
-	mov	r5, r1	/* save addr of gd */
-	mov	r6, r2	/* save addr of destination */
-
+	mov	r4, r0	/* wx: save 1th param got form caller: addr_sp */
+	mov	r5, r1	/* wx: save 2nd param got form caller: addr of gd */
+	/* wx: save 3th param got form caller: addr of destination 
+	 *(if nand boot, need set addr(3th param) is nand_boot bin destination
+	 * buffer)
+	 */
+	mov	r6, r2	
 	/* Set up the stack						    */
 stack_setup:
-	mov	sp, r4
+	mov	sp, r4 /* wx: MUST: setup stack*/
 
 	adr	r0, _start      /* from */
 	cmp	r0, r6          /* if code is in ram */
@@ -313,10 +330,7 @@ copy_loop:
 	stmia	r1!, {r9-r10}		/* copy to   target address [r1]    */
 	cmp	r0, r2			/* until source end address [r2]    */
 	blo	copy_loop
-
-    /*wx:comment:if need not second program load(means this system run 
-    * for itself memory, and need hold on at all runtime)
-    */
+	
 #ifndef CONFIG_SPL_BUILD
 	/*
 	 * fix .rel.dyn relocations
@@ -380,6 +394,8 @@ clbss_l:str	r2, [r0]		/* clear loop...		    */
  * We are done. Do not return, instead branch to second part of board
  * initialization, now running from RAM.
  */
+/*wx:comment:if need second program load
+*/
 #ifdef CONFIG_NAND_SPL
 	ldr     r0, _nand_boot_ofs
 	mov	pc, r0
