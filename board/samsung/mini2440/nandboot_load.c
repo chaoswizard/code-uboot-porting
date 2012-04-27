@@ -24,6 +24,9 @@
 #include <asm/arch/s3c24x0_cpu.h>
 
 
+//#define  NAND_BOOT_LOAD_VERIFY
+#define  NANDBOOT_IMG_LENGTH   0x80000
+
 
 #define __READ_B(a)   (*(volatile unsigned char *)(a))
 #define __READ_W(a)   (*(volatile unsigned short *)(a))
@@ -33,7 +36,7 @@
 #define __WRITE_L(v, a)   (*(volatile unsigned int *)(a) = (v))
 
 
-#ifdef CONFIG_NAND_BOOT_TEST
+#ifdef CONFIG_NAND_BOOT_CMD_TEST
 #define NFBT_DEBUG(s, args...)  printf(s, args)
 #define NFBT_PUTS(s)            printf(s)
 //#define debug(format, ...)   printf(format, __VA_ARGS__) 
@@ -67,7 +70,7 @@
 /*wx: NFSTAT[0]*/
 #define NFSTAT_BUSY_BIT	       (1 << 0)
 /*-------------------------------------------------*/
-#if defined(CONFIG_NAND_BOOT) || defined(CONFIG_NAND_BOOT_TEST)
+#if defined(CONFIG_NAND_BOOT) || defined(CONFIG_NAND_BOOT_CMD_TEST)
 static inline void nand_wait_chip_ready(void)
 {
 	struct s3c2440_nand *nand_reg = s3c2440_get_base_nand();
@@ -375,7 +378,7 @@ static int nand_read_ll(struct boot_nand_t *mtd, unsigned char *buf, unsigned lo
 	return ret;
 }
 
-
+#ifdef NAND_BOOT_LOAD_VERIFY
 static int nandboot_imgcmp(const void * cs,const void * ct,size_t count)
 {
 	const unsigned int *su1, *su2;
@@ -388,23 +391,14 @@ static int nandboot_imgcmp(const void * cs,const void * ct,size_t count)
 			
 	return 0;
 }
+#endif
 
-
-int nandboot_load_img(void)
+int nandboot_load_img(unsigned char * destAddr)
 {
 	struct boot_nand_t nand;
-	unsigned char * dest;
-#define LENGTH_UBOOT  (512<<10)
-
-#ifdef	CONFIG_NAND_BOOT_TEST
-	dest = (unsigned char *)CONFIG_NAND_BOOT_TEST;
-#else
-	dest = (unsigned char *)CONFIG_SYS_TEXT_BASE;
-#endif
     
-   NFBT_DEBUG("nandboot_load_load_img(dest 0+%x-> %x)...\n", 
-           LENGTH_UBOOT,
-           CONFIG_NAND_BOOT_TEST);
+   NFBT_DEBUG("nandboot_load_img(dest 0+%x-> %x)...\n", 
+           NANDBOOT_IMG_LENGTH, destAddr);
    
     // init nand
 	if (0 != nand_read_init(&nand))	{
@@ -415,18 +409,18 @@ int nandboot_load_img(void)
     NFBT_PUTS("init ok..");
 
     // load..
-    if (0 != nand_read_ll(&nand, dest, 0, LENGTH_UBOOT)) {
+    if (0 != nand_read_ll(&nand, destAddr, 0, NANDBOOT_IMG_LENGTH)) {
             NFBT_PUTS("nandboot_nand_read_ll failed\n");
             return -1; 
     }
 
     NFBT_PUTS("nandboot_load_load_successful\n");
     
-
+#ifdef NAND_BOOT_LOAD_VERIFY
     // verify
-	if (0 != nandboot_imgcmp(dest, CONFIG_BOOT_INNER_SRAM_BASE, CONFIG_BOOT_INNER_SRAM_SIZE))
+	if (0 != nandboot_imgcmp(destAddr, CONFIG_BOOT_INNER_SRAM_BASE, CONFIG_BOOT_INNER_SRAM_SIZE))
 		return -1;
-
+#endif
     
 	return  0;
 }

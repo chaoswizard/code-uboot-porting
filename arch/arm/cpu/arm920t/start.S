@@ -243,12 +243,14 @@ copyex:
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
 	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
 	@ load U-Boot to RAM
+	ldr r0, =CONFIG_SYS_TEXT_BASE
 	bl	nandboot_load_img
 	tst r0, #0x0
     	read_err_dead:
-	bne  read_err_dead
+	bne  read_err_dead /*if return is not zero, do hang*/
+    ldr pc, call_board_init_f 
 #endif
-
+  
 
 /* Set stackpointer in internal RAM to call board_init_f */
 /*
@@ -309,8 +311,6 @@ relocate_code:
 	mov	r4, r0	/* wx: save 1th param got form caller: addr_sp */
 	mov	r5, r1	/* wx: save 2nd param got form caller: addr of gd */
 	/* wx: save 3th param got form caller: addr of destination 
-	 *(if nand boot, need set addr(3th param) is nand_boot bin destination
-	 * buffer)
 	 */
 	mov	r6, r2	
 	/* Set up the stack						    */

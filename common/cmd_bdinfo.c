@@ -370,9 +370,9 @@ int do_bdinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	print_num("irq_sp", gd->irq_sp);	/* irq stack pointer */
 	print_num("sp start ", gd->start_addr_sp);
 	print_num("FB base  ", gd->fb_base);
-#ifdef  CONFIG_NAND_BOOT_TEST
+#ifdef  CONFIG_NAND_BOOT_CMD_TEST
     printf("nandboot teset begin");
-	if (0 == nandboot_load_img()) {
+	if (0 == nandboot_load_img((unsigned char*)CONFIG_NAND_BOOT_CMD_TEST)) {
         printf("load ok\n");
     } else {
         printf("load failed\n");
