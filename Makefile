@@ -361,7 +361,7 @@ BOARD_SIZE_CHECK =
 endif
 
 # Always append ALL so that arch config.mk's can add custom ones
-ALL-y += $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map
+ALL-y += $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map $(obj)u-boot.dis
 
 ALL-$(CONFIG_NAND_U_BOOT) += $(obj)u-boot-nand.bin
 ALL-$(CONFIG_ONENAND_U_BOOT) += $(obj)u-boot-onenand.bin
@@ -371,7 +371,7 @@ ALL-$(CONFIG_SPL) += $(obj)spl/u-boot-spl.bin
 ALL-$(CONFIG_OF_SEPARATE) += $(obj)u-boot.dtb $(obj)u-boot-dtb.bin
 
 all:		$(ALL-y) $(SUBDIR_EXAMPLES)
-		cp   -f u-boot.bin   ///mnt/hgfs/MyCodeDesign/gitbt$(CONFIG_SYS_TEXT_BASE).bin
+		cp   -f u-boot.bin   ///mnt/hgfs/MyCodeDesign/port_$(CONFIG_SYS_TEXT_BASE).bin
 		@echo wangxi mini2440 u-boot compile ok
 		@pwd
 		

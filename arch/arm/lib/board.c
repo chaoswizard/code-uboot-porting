@@ -514,8 +514,12 @@ void board_init_r(gd_t *id, ulong dest_addr)
 
 #if !defined(CONFIG_SYS_NO_FLASH)
 	puts("Flash: ");
-
-	flash_size = flash_init();
+#ifdef CONFIG_NAND_BOOT
+    //wx: norflash will init error when nandboot, resolve it later.~_~
+	flash_size = (2<<20); 
+#else
+    flash_size = flash_init();
+#endif
 	if (flash_size > 0) {
 # ifdef CONFIG_SYS_FLASH_CHECKSUM
 		char *s = getenv("flashchecksum");

@@ -240,15 +240,13 @@ copyex:
 #endif
 
 #ifdef CONFIG_NAND_BOOT
-	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
-	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
+    /*wx:temp stack, it will reset when load finished by other routines*/
+	ldr	sp, =(CONFIG_SYS_TEXT_BASE + (2<<20)) @wx: this address must in dram valid area
+    bic sp, sp, #7 /* 8-byte alignment for ABI compliance */
 	@ load U-Boot to RAM
 	ldr r0, =CONFIG_SYS_TEXT_BASE
 	bl	nandboot_load_img
-	tst r0, #0x0
-    	read_err_dead:
-	bne  read_err_dead /*if return is not zero, do hang*/
-    ldr pc, call_board_init_f 
+    ldr pc, =call_board_init_f 
 #endif
   
 
@@ -308,14 +306,12 @@ call_board_init_f:
  */
 	.globl	relocate_code
 relocate_code:
-	mov	r4, r0	/* wx: save 1th param got form caller: addr_sp */
-	mov	r5, r1	/* wx: save 2nd param got form caller: addr of gd */
-	/* wx: save 3th param got form caller: addr of destination 
-	 */
-	mov	r6, r2	
+	mov	r4, r0	/* save addr_sp */
+	mov	r5, r1	/* save addr of gd */
+	mov	r6, r2	/* save addr of destination */
 	/* Set up the stack						    */
 stack_setup:
-	mov	sp, r4 /* wx: MUST: setup stack*/
+	mov	sp, r4
 
 	adr	r0, _start      /* from */
 	cmp	r0, r6          /* if code is in ram */

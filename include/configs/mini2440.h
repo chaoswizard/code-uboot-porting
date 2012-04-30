@@ -43,22 +43,19 @@
 #define CONFIG_MINI2440		
 
 
-//wx: if boot code size is larger than 4K, need open this to reload ????
-//#define CONFIG_NAND_BOOT //CONFIG_NAND_SPL  
-#define CONFIG_BOOT_INNER_SRAM_SIZE     (4<<10)
+//wx: if nand boot img size is larger than 4K, need open this to reload
+#define CONFIG_NAND_BOOT //CONFIG_NAND_SPL  
 
 
 #ifdef CONFIG_NAND_BOOT
-#define CONFIG_SYS_TEXT_BASE	        0x30000000
-//wx: steppingstone zone maped addr, refrence of S3c2440 spec,C6-6
-#define CONFIG_BOOT_INNER_SRAM_BASE     0x00000000
+//#define CONFIG_SKIP_LOWLEVEL_INIT 
+/*wx: 0x33000000->0x34000000 (48M:16M)*/
+#define CONFIG_SYS_TEXT_BASE           0x33000000 
 #else
 /*wx:if run on ram, must open it*/
 #define CONFIG_SKIP_LOWLEVEL_INIT  
-//wx: if run in ram, relocate to top 48M/64M
-#define CONFIG_SYS_TEXT_BASE	       0x33000000
-#define CONFIG_NAND_BOOT_CMD_TEST      0x30000000
-#define CONFIG_BOOT_INNER_SRAM_BASE    0x40000000
+/*wx: 0x33400000->0x34000000 (52M:12M)*/
+#define CONFIG_SYS_TEXT_BASE           0x33400000
 #endif
 
 #define CONFIG_SYS_ARM_CACHE_WRITETHROUGH
@@ -242,7 +239,7 @@
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
 #define CONFIG_ENV_SIZE			 (0x10000)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET      	 (0x800000)//wx:add for nand boot)
+#define CONFIG_ENV_OFFSET      	 (0x800000)//wx:nand,8M:248M
 #define CONFIG_ENV_SIZE			 (64*2048)//64 pages
 #else
 #error where save environments?
