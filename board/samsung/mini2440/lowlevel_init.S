@@ -97,11 +97,11 @@
 #define B3_PMC			0x0	/* normal */
 
 /*wx:For LAN*/
-#define B4_Tacs			0x0	/*  0clk */
-#define B4_Tcos			0x0	/*  0clk */
-#define B4_Tacc			0x7	/* 14clk */
-#define B4_Tcoh			0x0	/*  0clk */
-#define B4_Tah			0x0	/*  0clk */
+#define B4_Tacs			0x1
+#define B4_Tcos			0x1
+#define B4_Tacc			0x6
+#define B4_Tcoh			0x1
+#define B4_Tah			0x1
 #define B4_Tacp			0x0
 #define B4_PMC			0x0	/* normal */
 
@@ -172,8 +172,8 @@ SMRDATA:
 /* BANKCON6 */    .word ((B6_MT<<15)+(B6_Trcd<<2)+(B6_SCAN))
 /* BANKCON7 */    .word ((B7_MT<<15)+(B7_Trcd<<2)+(B7_SCAN))
 /* REFRESH  */    .word ((REFEN<<23)+(TREFMD<<22)+(Trp<<20)+(Trc<<18)+(Tchr<<16)+REFCNT)
-    /*wx: bank6/7 size(mini2440 is 2 piece K4S561632N(32M),total size is 64M)
-    *     therefor BK76MAP bit[2:0] = 001, means 64M byte.
+    /*wx: bank6/7 size(mini2440 is 2 piece K4S561632N(32M:[4M x 16Bit x 4Bank]) Share Bank6(All CS Connected to nGCS6))
+    *     therefor The Bank6 mapped to 64M Address, and the BK76MAP bit[2:0] = 001, means 64M byte.
     */
 /* BANKSIZE */    .word 0xb1 /* enable burst operation */
 /* MRSRB6   */    .word 0x30

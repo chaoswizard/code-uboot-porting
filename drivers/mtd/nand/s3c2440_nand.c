@@ -261,6 +261,10 @@ int board_nand_init(struct nand_chip *nand)
 #else
 	nand->options = 0;
 #endif
+    
+
+    printf("ecc:size(%d), bytes(%d), steps(%d)\n", nand->ecc.size, 
+        nand->ecc.bytes, nand->ecc.steps);
 
 	debug("end of nand_init\n");
 

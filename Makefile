@@ -371,7 +371,8 @@ ALL-$(CONFIG_SPL) += $(obj)spl/u-boot-spl.bin
 ALL-$(CONFIG_OF_SEPARATE) += $(obj)u-boot.dtb $(obj)u-boot-dtb.bin
 
 all:		$(ALL-y) $(SUBDIR_EXAMPLES)
-		cp   -f u-boot.bin   /media/sf_MyCodeDesign/port_$(CONFIG_SYS_TEXT_BASE).bin
+		cp   -f u-boot.bin   /media/sf_MyCodeDesign/port_share_$(CONFIG_SYS_TEXT_BASE).bin
+		cp   -f u-boot.bin   /my_tftp_root/port_tftp_$(CONFIG_SYS_TEXT_BASE).bin
 		@echo wangxi mini2440 u-boot compile ok
 		@pwd
 		

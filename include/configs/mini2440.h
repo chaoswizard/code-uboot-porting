@@ -72,10 +72,15 @@
 /*
  * Hardware drivers
  */
-#if 0
+#if 1
 /*mini2440 use DM9000EP which conected with nGCS4(0x20000000)*/
-
-//#else
+#define CONFIG_DRIVER_DM9000
+#define CONFIG_DM9000_NO_SROM
+#define CONFIG_DM9000_BASE       0x20000300
+#define DM9000_IO                CONFIG_DM9000_BASE
+#define DM9000_DATA             (CONFIG_DM9000_BASE + 4)
+#define CONFIG_DM9000_DEBUG
+#else
 #define CONFIG_CS8900		/* we have a CS8900 on-board */
 #define CONFIG_CS8900_BASE	0x19000300
 #define CONFIG_CS8900_BUS16	/* the Linux driver does accesses as shorts */
@@ -125,6 +130,7 @@
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_REGINFO
 #define CONFIG_CMD_USB
+#define CONFIG_CMD_NET
 
 #define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
@@ -136,9 +142,11 @@
 #define CONFIG_RESET_TO_RETRY
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
+#define CONFIG_ETHADDR      00:01:02:03:04:05
 #define CONFIG_NETMASK		255.255.255.0
-#define CONFIG_IPADDR		10.0.0.110
-#define CONFIG_SERVERIP		10.0.0.1
+#define CONFIG_IPADDR		192.168.0.218
+#define CONFIG_SERVERIP		192.168.0.100
+#define CONFIG_GATEWAYIP    192.168.0.1
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	115200	/* speed to run kgdb serial port */
@@ -234,15 +242,15 @@
 #define CONFIG_ENV_IS_IN_FLASH
 #endif
 
+#define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
+
 
 #if defined(CONFIG_ENV_IS_IN_FLASH)
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
-#define CONFIG_ENV_SIZE			 (0x10000)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET      	 (0x800000)//wx:nand,8M:248M
-#define CONFIG_ENV_SIZE			 (64*2048)//64 pages
+#define CONFIG_ENV_OFFSET      	 (0x3f0000)//wx:nand,4M:252M
 #else
-#error where save environments?
+#error save environments?
 #endif
 
 
