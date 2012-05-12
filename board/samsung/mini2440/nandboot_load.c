@@ -34,23 +34,21 @@
 #define  NANDBOOT_IMG_LENGTH   0x80000
 
 
-#define __READ_B(a)   (*(volatile unsigned char *)(a))
-#define __READ_W(a)   (*(volatile unsigned short *)(a))
-#define __READ_L(a)   (*(volatile unsigned int *)(a))
-#define __WRITE_B(v, a)   (*(volatile unsigned char *)(a) = (v))
-#define __WRITE_W(v, a)   (*(volatile unsigned short *)(a) = (v)
-#define __WRITE_L(v, a)   (*(volatile unsigned int *)(a) = (v))
 
-
-#if 0
-// #define NFBT_DEBUG(s, args...)  printf(s, args)
-// #define NFBT_PUTS(s)            printf(s)
-//#define debug(format, ...)   printf(format, __VA_ARGS__) 
-//#define debug(format, ...) printf(format, ## __VA_ARGS__) 
+#if 1
+#define __READ_B(c)       readb(c)
+#define __READ_W(c)       readw(c)
+#define __READ_L(c)       readl(c)
+#define __WRITE_B(v, c)   writeb(v, c)
+#define __WRITE_L(v, c)   writel(v, c)
 #else
-// #define NFBT_DEBUG(s, args...)  
-// #define NFBT_PUTS(s)            
+#define __READ_B(c)       (*(volatile unsigned char *)(c))
+#define __READ_W(c)       (*(volatile unsigned short *)(c))
+#define __READ_L(c)       (*(volatile unsigned int *)(c))
+#define __WRITE_B(v, c)   (*(volatile unsigned char *)(c) = (v))
+#define __WRITE_L(v, c)   (*(volatile unsigned int *)(c) = (v))
 #endif
+
 /*--------------- NFCONF --------------------------*/
 /*wx: NFCONF[13:12]*/
 #define NFCONF_TACLS(x)         ((x) << 12)
@@ -121,62 +119,44 @@ void speaker_play(int times)
 
 #if defined(CONFIG_NAND_BOOT)
 #ifdef NANDBOOT_DEBUG
-#define LOAD_STATUS_DEBUG(x)  show_boot_status(x)
 #define LOAD_STATUS_ERROR(x)  show_boot_status(x)
 #else
-#define LOAD_STATUS_DEBUG(x) 
 #define LOAD_STATUS_ERROR(x)
 #endif
 
 enum {
-    NFBT_STATUS_INIT = 0,
-    NFBT_STATUS_READ_ID,  
-    NFBT_STATUS_READ_IMG,
-    NFBT_STATUS_READ_PAGE,
-    NFBT_STATUS_READ_OK,
-    NFBT_STATUS_READ_ERR,
+    NFBT_STATUS_UNSUPPORT_ID = 1,
     NFBT_STATUS_ALIGN_ERR,
-    NFBT_STATUS_LOAD_OK,
+    NFBT_STATUS_UNSUPPORT_PAGE_SIZE,
     NFBT_STATUS_LOAD_ERR,
     NFBT_STATUS_VERIFY_ERR,
+    NFBT_STATUS_LOAD_END,
 };
 
 
 
 void  show_boot_status(unsigned int flag)
 {
-    int i = 0;
-    int hang = 0;
     switch (flag)
     {
-      case NFBT_STATUS_INIT: 
-      case NFBT_STATUS_READ_ID:
-      case NFBT_STATUS_READ_IMG:
-        i = 1;
-        break;
-      case NFBT_STATUS_LOAD_OK:
-        i = 2;
-        break;
+      case NFBT_STATUS_UNSUPPORT_ID:
       case NFBT_STATUS_ALIGN_ERR:
-        i = 4;
-        hang = 1;
-        break;
-      case NFBT_STATUS_VERIFY_ERR: 
-        i = 5;
-        hang = 1;
-        break;
+      case NFBT_STATUS_UNSUPPORT_PAGE_SIZE:
       case NFBT_STATUS_LOAD_ERR:
-        i = 3;
-        hang = 1;
+      case NFBT_STATUS_VERIFY_ERR: 
+           do {
+               speaker_play(flag);
+          } while(1);
+        break;
+      case NFBT_STATUS_LOAD_END:
+          speaker_play(2);
+          speaker_play(2);
+          speaker_play(5);
         break;
       default:
-        i = 0;
         break;
     }
     
-    do {
-        if (i)speaker_play(i);
-   } while(hang);
 }
 
 
@@ -190,9 +170,6 @@ static inline void nand_wait_chip_ready(void)
 
 	while (!(__READ_B(&nand_reg->nfstat) & NFSTAT_BUSY_BIT)) {
         for (i=0; i<10; i++);
-//         NFBT_DEBUG("no ready %x: %x\n", 
-//                    &nand_reg->nfstat,
-//                    __READ_B(&nand_reg->nfstat));
     }
 		
 }
@@ -273,6 +250,7 @@ static int is_bad_block(struct boot_nand_t * mtd, unsigned long i)
 		    &nand_reg->nfcmd);
 		    
 	}  else  {
+    	LOAD_STATUS_ERROR(NFBT_STATUS_UNSUPPORT_PAGE_SIZE);
 		return -1;
 	}
 	nand_wait_chip_ready();
@@ -291,13 +269,10 @@ static int nand_read_page_ll(struct boot_nand_t * mtd, unsigned char *buf, unsig
 	unsigned short *ptr16 = (unsigned short *)buf;
 	unsigned int i, page_num;
 
-//  NFBT_DEBUG("read:%x\n", addr);
-    LOAD_STATUS_DEBUG(NFBT_STATUS_READ_PAGE);
     
 	nand_clear_chip_busy();
             
 	__WRITE_B(NAND_CMD_READ0, &nand_reg->nfcmd);
-//  NFBT_DEBUG("%x:cmd:%x/%x\n", &nand_reg->nfcmd, __READ_B(&nand_reg->nfcmd), NAND_CMD_READ0);
 	
     if (mtd->page_size == 512) {
 		/* Write Address */
@@ -327,21 +302,18 @@ static int nand_read_page_ll(struct boot_nand_t * mtd, unsigned char *buf, unsig
 		__WRITE_B(NAND_CMD_READSTART, 
 		    &nand_reg->nfcmd);
 	} else {
-//         NFBT_DEBUG("unsupport page %d\n", mtd->page_size);
-        LOAD_STATUS_DEBUG(NFBT_STATUS_READ_ERR);
+        LOAD_STATUS_ERROR(NFBT_STATUS_UNSUPPORT_PAGE_SIZE);
 		return -1;
 	}
 	
    	nand_wait_chip_ready();
     
-//  NFBT_DEBUG("data:-> 0x%x...\n", buf);
     
 	for (i = 0; i < (mtd->page_size>>1); i++) {
 		*ptr16 = __READ_W(&nand_reg->nfdata);
 		ptr16++;
 	}
     
-    LOAD_STATUS_DEBUG(NFBT_STATUS_READ_OK);
     
 	return 0;
 }
@@ -351,7 +323,6 @@ static unsigned short nand_read_id()
 	struct s3c2440_nand *nand_reg = s3c2440_get_base_nand();
 	unsigned short res = 0;
 
-    LOAD_STATUS_DEBUG(NFBT_STATUS_READ_ID);
     
 	__WRITE_B(NAND_CMD_READID, &nand_reg->nfcmd);
 	
@@ -372,7 +343,6 @@ static int nand_read_init(struct boot_nand_t *mtd)
     unsigned int cfg;
 	int i;
 	
-//  NFBT_PUTS("read init start...\n");
     
     /* Enable NAND flash clk */
     __WRITE_L(__READ_L(&clk_power->clkcon) | (1 << 4), &clk_power->clkcon);
@@ -380,7 +350,6 @@ static int nand_read_init(struct boot_nand_t *mtd)
     cfg = NFCONF_TACLS(1) | NFCONF_TWRPH0(2) | NFCONF_TWRPH1(0) | NFCONF_BUSWIDTH(0);
 	__WRITE_L(cfg, &nand_reg->nfconf);
 	
-//  NFBT_DEBUG("%x:%x/%x\n", &nand_reg->nfconf, __READ_L(&nand_reg->nfconf), cfg);
     
     cfg = NFCONT_MODE_BIT; /* wx:controler enable */
     cfg &= ~NFCONT_RnB_MODE;//wx: detect rise edge, 
@@ -390,24 +359,18 @@ static int nand_read_init(struct boot_nand_t *mtd)
     cfg &= ~NFCONT_nCE_BIT;//chip enable,
 	__WRITE_L(cfg, &nand_reg->nfcont);
 
-//  NFBT_DEBUG("%x:%x/%x\n", &nand_reg->nfcont, __READ_L(&nand_reg->nfcont), cfg);
     
     cfg = NFSTAT_RnB_BIT | NFSTAT_nCE_BIT;
 	__WRITE_L(cfg, &nand_reg->nfstat);	/*wx: clr RnB*/
 
-// 	NFBT_DEBUG("%x:%x/%x\n", &nand_reg->nfstat, __READ_L(&nand_reg->nfstat), cfg);
 	//------------------------------------------------------------------
     
     
 	__WRITE_B(NAND_CMD_RESET, &nand_reg->nfcmd); /*wx: reset mtd*/
-//  NFBT_DEBUG("%x:cmd:%x/%x\n", &nand_reg->nfcmd, __READ_B(&nand_reg->nfcmd), NAND_CMD_RESET);
     
     //wx: is NFSTAT_RnB_BIT is hight, means chip is ready
 	while(!(__READ_B(&nand_reg->nfstat) & NFSTAT_RnB_BIT)) {
         for (i=0; i<10; i++);
-//      NFBT_DEBUG("RnB %x: %x\n", 
-//                    &nand_reg->nfstat,
-//                    __READ_B(&nand_reg->nfstat));
     }
     
 	
@@ -438,11 +401,10 @@ static int nand_read_init(struct boot_nand_t *mtd)
 #endif
 	} else {
 		i = -1; // hang
+		LOAD_STATUS_ERROR(NFBT_STATUS_UNSUPPORT_ID);
 	}
 	
 	nand_disable_chip();
-//     NFBT_DEBUG("NandInfo: ID=0x%x, page=%d, blk=%d\n", nand_id, 
-//                mtd->page_size, cfg);
 	return i;
 	
 }
@@ -452,13 +414,10 @@ static int nand_read_ll(struct boot_nand_t *mtd, unsigned char *buf, unsigned lo
 {
 	int i, ret;
     
-     LOAD_STATUS_DEBUG(NFBT_STATUS_READ_IMG);
     
 #ifdef NANDBOOT_SKIP_BAD
 	if ((start_addr & (mtd->block_size-1)) || (size & ((mtd->block_size-1)))) {
         LOAD_STATUS_ERROR(NFBT_STATUS_ALIGN_ERR);
-//         NFBT_DEBUG("invalid alignment:%x:%x:%x\n", start_addr, 
-//                    mtd->block_size-1,  size);
         return -1;  /* invalid alignment */
     }
 #endif		
@@ -507,8 +466,10 @@ static int nandboot_imgcmp(const void * cs,const void * ct,size_t count)
 	count >>= 2;
 	
 	for(su1 = cs, su2 = ct; 0 < count; ++su1, ++su2, count--)
-		if (*su1 !=  *su2)
-			return -1;
+		if (*su1 !=  *su2) {
+            LOAD_STATUS_ERROR(NFBT_STATUS_VERIFY_ERR);
+            return -1;
+        }      
 			
 	return 0;
 }
@@ -518,36 +479,27 @@ int nandboot_load_img(unsigned char * destAddr)
 {
 	struct boot_nand_t nand;
     
-//    NFBT_DEBUG("nandboot_load_img(dest 0+%x-> %x)...\n", 
-//            NANDBOOT_IMG_LENGTH, destAddr);
-   LOAD_STATUS_DEBUG(NFBT_STATUS_INIT); 
    
     // init nand
 	if (0 != nand_read_init(&nand))	{
-//      NFBT_DEBUG("nand_read_init failed(%d)\n", nand.page_size);
         return -1; 
     }
     
-//     NFBT_PUTS("init ok..");
     
     // load..
     if (0 != nand_read_ll(&nand, destAddr, 0, NANDBOOT_IMG_LENGTH)) {
-//      NFBT_PUTS("nandboot_nand_read_ll failed\n");
-        LOAD_STATUS_ERROR(NFBT_STATUS_LOAD_ERR);
         return -1; 
     }
 
-//     NFBT_PUTS("nandboot_load_load_successful\n");
     
 #ifdef NANDBOOT_LOAD_VERIFY
     // verify
 	if (0 != nandboot_imgcmp(destAddr, STEPPING_STONE_RAM_BASE, STEPPING_STONE_RAM_SIZE)) {
-        LOAD_STATUS_ERROR(NFBT_STATUS_VERIFY_ERR);
         return -1;
     }
 #endif
     
-    LOAD_STATUS_DEBUG(NFBT_STATUS_LOAD_OK);
+    LOAD_STATUS_ERROR(NFBT_STATUS_LOAD_END);
  	return  0;
 }
 #endif
