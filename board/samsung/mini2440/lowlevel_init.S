@@ -53,9 +53,9 @@
 #define WAIT			(0x1<<2)
 #define UBLB			(0x1<<3)
 
-#define B1_BWSCON		(DW16)
+#define B1_BWSCON		(DW32)
 #define B2_BWSCON		(DW16)
-#define B3_BWSCON		(DW16)
+#define B3_BWSCON		(DW16 + WAIT + UBLB)
 #define B4_BWSCON		(DW16)
 #define B5_BWSCON		(DW16)
 /*wx:mini2440 SDRAM use 2 piece K4S561632N(16bit) run parallely = 32*/

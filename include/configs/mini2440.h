@@ -44,7 +44,7 @@
 
 
 //wx: if nand boot img size is larger than 4K, need open this to reload
-//#define CONFIG_NAND_BOOT //CONFIG_NAND_SPL  
+#define CONFIG_NAND_BOOT //CONFIG_NAND_SPL  
 
 
 #ifdef CONFIG_NAND_BOOT
@@ -72,7 +72,7 @@
 /*
  * Hardware drivers
  */
-#if 0
+#if 1
 /*mini2440 use DM9000EP which conected with nGCS4(0x20000000)*/
 #define CONFIG_DRIVER_DM9000
 #define CONFIG_DM9000_NO_SROM
@@ -130,7 +130,7 @@
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_REGINFO
 #define CONFIG_CMD_USB
-//#define CONFIG_CMD_NET
+#define CONFIG_CMD_NET
 
 #define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
@@ -236,19 +236,19 @@
 #define CONFIG_SYS_MAX_FLASH_SECT	(35) //wx:replace:(19)
 
 
-#if 1//defined (CONFIG_NAND_BOOT)
+#if defined (CONFIG_NAND_BOOT)
 #define CONFIG_ENV_IS_IN_NAND //CONFIG_ENV_IS_IN_FLASH//
 #else
 #define CONFIG_ENV_IS_IN_FLASH
 #endif
 
-#define CONFIG_ENV_SIZE			 (0x10000)
+#define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
 
 
 #if defined(CONFIG_ENV_IS_IN_FLASH)
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET      	 (0x800000)//wx:nand,8M:248M
+#define CONFIG_ENV_OFFSET      	 (0x3f0000)//wx:nand,4M:252M
 #else
 #error save environments?
 #endif
