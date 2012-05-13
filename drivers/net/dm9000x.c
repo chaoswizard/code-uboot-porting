@@ -372,10 +372,9 @@ static int dm9000_init(struct eth_device *dev, bd_t *bd)
 	while (!(dm9000_phy_read(1) & 0x20)) {	/* autonegation complete bit */
 		udelay(1000);
 		i++;
-		if (i == 1000) {
-//			printf("could not establish link\n");
-//			return 0;
-			break;
+		if (i == 3000) {
+			printf("could not establish link\n");
+			return 0;
 		}
 	}
 
@@ -602,7 +601,7 @@ dm9000_phy_read(int reg)
 	/* Fill the phyxcer register into REG_0C */
 	DM9000_iow(DM9000_EPAR, DM9000_PHY | reg);
 	DM9000_iow(DM9000_EPCR, 0xc);	/* Issue phyxcer read command */
-	udelay(100);			/* Wait read complete */
+	udelay(1000);//udelay(100);			/* Wait read complete wx:resolve First times Ping failed*/
 	DM9000_iow(DM9000_EPCR, 0x0);	/* Clear phyxcer read command */
 	val = (DM9000_ior(DM9000_EPDRH) << 8) | DM9000_ior(DM9000_EPDRL);
 
