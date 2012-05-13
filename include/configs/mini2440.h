@@ -79,7 +79,7 @@
 #define CONFIG_DM9000_BASE       0x20000300
 #define DM9000_IO                CONFIG_DM9000_BASE
 #define DM9000_DATA             (CONFIG_DM9000_BASE + 4)
-#define CONFIG_DM9000_DEBUG
+//#define CONFIG_DM9000_DEBUG
 #else
 #define CONFIG_CS8900		/* we have a CS8900 on-board */
 #define CONFIG_CS8900_BASE	0x19000300
@@ -142,11 +142,11 @@
 #define CONFIG_RESET_TO_RETRY
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
-#define CONFIG_ETHADDR      00:01:02:03:04:05
+#define CONFIG_ETHADDR    01:09:08:05:09:09
 #define CONFIG_NETMASK		255.255.255.0
-#define CONFIG_IPADDR		192.168.0.218
-#define CONFIG_SERVERIP		192.168.0.100
-#define CONFIG_GATEWAYIP    192.168.0.1
+#define CONFIG_IPADDR		192.168.0.58
+#define CONFIG_SERVERIP	192.168.0.100
+#define CONFIG_GATEWAYIP  192.168.0.100
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	115200	/* speed to run kgdb serial port */
@@ -242,13 +242,14 @@
 #define CONFIG_ENV_IS_IN_FLASH
 #endif
 
-#define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
 
 
 #if defined(CONFIG_ENV_IS_IN_FLASH)
-#define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x1f0000)//wx:replace:(CONFIG_SYS_FLASH_BASE + 0x070000)
+#define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
+#define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x200000 - CONFIG_ENV_SIZE)//wx:norflash: 2M:0
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET      	 (0x3f0000)//wx:nand,4M:252M
+#define CONFIG_ENV_SIZE			 (0x20000) // 128*1024, wx: MUST mutiply with Block Size(128K)
+#define CONFIG_ENV_OFFSET      	 (0x200000 - CONFIG_ENV_SIZE)//wx:nand,2M:254M
 #else
 #error save environments?
 #endif

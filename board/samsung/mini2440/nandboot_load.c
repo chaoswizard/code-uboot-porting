@@ -150,7 +150,6 @@ void  show_boot_status(unsigned int flag)
         break;
       case NFBT_STATUS_LOAD_END:
           speaker_play(2);
-          speaker_play(2);
           speaker_play(5);
         break;
       default:
