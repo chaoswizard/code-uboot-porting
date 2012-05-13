@@ -142,11 +142,13 @@
 #define CONFIG_RESET_TO_RETRY
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
-#define CONFIG_ETHADDR    01:09:08:05:09:09
+//wx: the Head 3 bytes MUST is a valid Value,or else the MAC will set Failed.
+#define CONFIG_ETHADDR      12:34:56:85:09:09
 #define CONFIG_NETMASK		255.255.255.0
-#define CONFIG_IPADDR		192.168.0.58
-#define CONFIG_SERVERIP	192.168.0.100
-#define CONFIG_GATEWAYIP  192.168.0.100
+//wx: because my wireless LAN has used 192.168.0.X net, and I seted wired LAN on 192.168.9.X net
+#define CONFIG_IPADDR		192.168.9.1
+#define CONFIG_SERVERIP 	192.168.9.2
+#define CONFIG_GATEWAYIP    192.168.9.2
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	115200	/* speed to run kgdb serial port */
