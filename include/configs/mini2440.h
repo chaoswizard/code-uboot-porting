@@ -66,6 +66,9 @@
 #undef CONFIG_USE_IRQ		/* we don't need IRQ/FIQ stuff */
 
 #define CONFIG_CMDLINE_TAG	/* enable passing of ATAGs */
+/*'wx: if defined this macro, uboot will auto create the memery info tag, if not
+ * MUST describle in CONFIG_BOOTARGS "mem=xx"(e.g. mem=64M)
+ */
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_INITRD_TAG
 
@@ -174,7 +177,7 @@
 #define CONFIG_SYS_MEMTEST_START	0x30000000	/* memtest works on */
 #define CONFIG_SYS_MEMTEST_END		0x33F00000	/* 63 MB in DRAM */
 
-#define CONFIG_SYS_LOAD_ADDR		0x30800000
+#define CONFIG_SYS_LOAD_ADDR		0x30008000
 
 #define CONFIG_SYS_HZ			1000
 
@@ -245,20 +248,10 @@
 #endif
 
 
-
-#if defined(CONFIG_ENV_IS_IN_FLASH)
-#define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
-#define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x200000 - CONFIG_ENV_SIZE)//wx:norflash: 2M:0
-#elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_SIZE			 (0x20000) // 128*1024, wx: MUST mutiply with Block Size(128K)
-#define CONFIG_ENV_OFFSET      	 (0x200000 - CONFIG_ENV_SIZE)//wx:nand,2M:254M
-#else
-#error save environments?
-#endif
-
-
 /* allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
+
+
 
 /*
  * Size of malloc() pool
@@ -298,6 +291,62 @@
 #define CONFIG_MTD_PARTITIONS
 #define CONFIG_YAFFS2
 #define CONFIG_RBTREE
+
+
+#define BT_XMK_STR(x)	#x
+#define BT_MK_STR(x)	BT_XMK_STR(x)
+
+
+#define  IMG_UBOOT_PATH      "u-boot.bin"
+#define  IMG_KERNEL_PATH     "uImage"
+#define  IMG_ROOTFS_PATH     "rootfs.cramfs"
+
+#define  IMG_UBOOT_OFFSET     0
+#define  IMG_UBOOT_SIZE       0x100000
+
+#define  IMG_KERNEL_OFFSET    0x100000
+#define  IMG_KERNEL_SIZE      0x400000
+
+#define  IMG_ROOTFS_OFFSET    0x500000
+#define  IMG_ROOTFS_SIZE      0x600000
+
+
+
+
+
+#if defined(CONFIG_ENV_IS_IN_FLASH)
+#define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
+#define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x200000 - CONFIG_ENV_SIZE)//wx:norflash: 2M:0
+#elif defined(CONFIG_ENV_IS_IN_NAND)
+#define CONFIG_ENV_SIZE			 (0x20000) // 128*1024, wx: MUST mutiply with Block Size(128K)
+#define CONFIG_ENV_OFFSET      	 (IMG_UBOOT_OFFSET + IMG_UBOOT_SIZE - CONFIG_ENV_SIZE)//wx:nand,2M:254M
+#else
+#error save environments?
+#endif
+
+// boot default 
+#define CONFIG_BOOTCOMMAND  \
+       "nand read " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)\
+       ";bootm" BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
+
+//wx: usage: run 'cmdname' on console input line.
+#define INSTALL_UBOOT_COMMAND  \
+        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " IMG_UBOOT_PATH\
+        ";nand erase " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)\
+        ";nand write " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)
+
+#define INSTALL_KERNEL_COMMAND  \
+        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
+        ";nand erase " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)\
+        ";nand write " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)
+
+#define INSTALL_ROOTFS_COMMAND  \
+        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " "IMG_ROOTFS_PATH\
+        ";nand erase " BT_MK_STR(IMG_ROOTFS_OFFSET) " " BT_MK_STR(IMG_ROOTFS_SIZE)\
+  ";nand write.jffs2 " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " BT_MK_STR(IMG_ROOTFS_OFFSET) " " BT_MK_STR(IMG_ROOTFS_SIZE)
+
+
+
 
 /* additions for new relocation code, must be added to all boards */
 //wx:comment physical ram start address.(mini2440 sdram use nGCS6)

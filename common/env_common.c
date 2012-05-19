@@ -119,6 +119,18 @@ const uchar default_environment[] = {
 #ifdef	CONFIG_EXTRA_ENV_SETTINGS
 	CONFIG_EXTRA_ENV_SETTINGS
 #endif
+
+#ifdef INSTALL_UBOOT_COMMAND
+    "install-uboot=" INSTALL_UBOOT_COMMAND    "\0"
+#endif
+
+#ifdef INSTALL_KERNEL_COMMAND
+    "install-kernel=" INSTALL_KERNEL_COMMAND    "\0"
+#endif
+
+#ifdef INSTALL_ROOTFS_COMMAND
+   "install-rootfs=" INSTALL_ROOTFS_COMMAND    "\0"
+#endif
 	"\0"
 };
 
