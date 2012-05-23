@@ -16,6 +16,36 @@ sed -n 's/^\([^:\(\)]\+\.h\).*$/\.\/include\/configs\/\1/p' del_file_list1  |tr 
 
 //MUST remove reverse files form this list first
 sed -n 's/^\([^:\(\)]\+\.h\).*$/\1/p' del_file_list|xargs -t rm -f
+//=====================================================================================
+
+mkimage -n 'linux-2.6.32.2' -A arm -O linux -T kernel -C none -a 0x30008000 -e 0x30008000 -d zImage uImage.img
+
+编译u-boot成功后会在u-boot-2009.08/tools下生成mkimage的可执行的文件，为了我们在任何地方都可以使用这个命令，首先我们可以把这个可执行文件复制到/usr/local/bin.这样就可以在任意的目录下执行这个命令了。复制完以后我们在终端下输入“mkimage”,并按下回车。可以看到下面的输出的信息，说明我们已经可以使用改命令了。
+
+
+//zImage is buid from kernel 
+
+Usage: mkimage -l image
+          -l ==> list image header information
+       mkimage [-x] -A arch -O os -T type -C comp -a addr -e ep -n name -d data_file[:data_file...] image
+          -A ==> set architecture to 'arch' //用于指定CPU类型，比如ARM
+          -O ==> set operating system to 'os' //用于指定操作系统，比如Linux
+          -T ==> set image type to 'type'//用于指定image类型，比如Kernelramdisk
+          -C ==> set compression type 'comp'//指定压缩类型
+          -a ==> set load address to 'addr' (hex)//指定image的载入地址
+          -e ==> set entry point to 'ep' (hex)//内核的入口地址，一般是：image的载入地址+0x40（信息头的大小）
+          -n ==> set image name to 'name'//image在头结构中的命名
+          -d ==> use image data from 'datafile'//无头信息的image文件名
+          -x ==> set XIP (execute in place)//设置执行位置即不进行文件的拷贝，在当前位置执行
+       mkimage [-D dtc_options] -f fit-image.its fit-image 
+
+
+#define CONFIG_BOOTARGS    "noinitrd root=/dev/mtdblock3 init=/linuxrc console=ttySAC0,115200 mem=64M"
+
+//只有这个宏定义了以后 上面的哪个宏的定义才会生效，否则还是会直接的出现命令行的提示符，不会引导内核的。 root=/dev/mtdblock3 这是有我们Linux中的nand Flash分区所决定的，我的NandFlash的第四个分区为根文件系统所以是mtdblock3,如果不是的话请修改
+
+我的NandFlash的情况是这样的
+
 
 
 
