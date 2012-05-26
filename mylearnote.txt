@@ -18,7 +18,7 @@ sed -n 's/^\([^:\(\)]\+\.h\).*$/\.\/include\/configs\/\1/p' del_file_list1  |tr 
 sed -n 's/^\([^:\(\)]\+\.h\).*$/\1/p' del_file_list|xargs -t rm -f
 //=====================================================================================
 
-mkimage -n 'linux-2.6.32.2' -A arm -O linux -T kernel -C none -a 0x30008000 -e 0x30008000 -d zImage uImage.img
+mkimage -n 'WangXi-2.6.32.2' -A arm -O linux -T kernel -C none -a 0x30008000 -e 0x30008040 -d zImage uImage
 
 编译u-boot成功后会在u-boot-2009.08/tools下生成mkimage的可执行的文件，为了我们在任何地方都可以使用这个命令，首先我们可以把这个可执行文件复制到/usr/local/bin.这样就可以在任意的目录下执行这个命令了。复制完以后我们在终端下输入“mkimage”,并按下回车。可以看到下面的输出的信息，说明我们已经可以使用改命令了。
 

@@ -581,6 +581,9 @@ int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char * const argv[])
 
 		nand = &nand_info[dev];
 		rwsize = size;
+        
+        printf("\n%s, size:%ld(erase), %ld(write), %ld(oob)\n", 
+            nand->name, nand->erasesize, nand->writesize, nand->oobsize);
 
 		s = strchr(cmd, '.');
 		if (!s || !strcmp(s, ".jffs2") ||

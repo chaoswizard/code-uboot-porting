@@ -140,10 +140,22 @@
 #define CONFIG_CMDLINE_EDITING
 
 /* autoboot */
-#define CONFIG_BOOTDELAY	5
+#define CONFIG_BOOTDELAY	9
 #define CONFIG_BOOT_RETRY_TIME	-1
 #define CONFIG_RESET_TO_RETRY
 #define CONFIG_ZERO_BOOTDELAY_CHECK
+
+
+// nand flash boot, rootfs at mtd3, refer to kernel partition.
+#define CONFIG_BOOTARGS         	\
+	"noinitrd "\
+	"console=ttySAC0,115200 "\
+	"root=/dev/mtdblock2 rw "\
+	"rootfstype=yaffs "\
+    "init=/linuxrc"
+
+
+
 
 //wx: the Head 3 bytes MUST is a valid Value,or else the MAC will set Failed.
 #define CONFIG_ETHADDR      12:34:56:85:09:09
@@ -289,6 +301,9 @@
 #define CONFIG_CMD_MTDPARTS
 #define CONFIG_MTD_DEVICE
 #define CONFIG_MTD_PARTITIONS
+//wx: write nand as yaffs
+#define CONFIG_CMD_NAND_YAFFS
+
 #define CONFIG_YAFFS2
 #define CONFIG_RBTREE
 
@@ -299,16 +314,69 @@
 
 #define  IMG_UBOOT_PATH      "u-boot.bin"
 #define  IMG_KERNEL_PATH     "uImage"
-#define  IMG_ROOTFS_PATH     "rootfs.cramfs"
+#define  IMG_ROOTFS_PATH     "rootfs.img"
 
+/**
+*  NAND Partion Will Create as bellow layout when burn img to nand
+*  0  - 4M : boot (here we only use 0-1M, 1M-4M unused)[burn as raw]
+*  4M - 8M : kernel(here we only use 4-7M, 7M-8M unused)[burn as raw]
+*  8M - ?  : fs [burn as fs]
+*
+*!NOTE:
+* [burn as raw] is for u-boot read as raw mode when load the kernel image(u-boot 
+*  not support read nand as yaffs mode[default code])
+* [burn as fs] is for kernel mount nand as fs mode when kernel init.(MUST make
+*  image to fs, and read as fs mode for load image)
+* So FrinedlyArm-linux-kernnel nand partition as bellow:
+* (refer to the linux-kernel: mach-mini2440.c  friendly_arm_default_nand_part[] line282)
+* 
+static struct mtd_partition friendly_arm_default_nand_part[] = {
+	[0] = {
+		.name	= "uboot+params",
+		.size	= SZ_4M,
+		.offset	= 0,
+	},
+	[1] = {
+		.name	= "kernel",
+		.offset = SZ_4M,
+		.size	= SZ_4M,
+	},
+	[2] = {
+		.name	= "rootfs",
+		.offset = SZ_8M,
+		.size	= 1024 * 1024 * 1024, //
+	},
+	[3] = {
+		.name	= "whole_nand",
+		.offset = 0x00000000,
+		.size	= 1024 * 1024 * 1024, //
+	}
+};
+
+*/
+
+//wx: enable the nand defalut partition manage 
+#define MTDIDS_DEFAULT "nand0=nandflash0"
+//wx: define the defalut nand partion configure,
+/** wx: !NOTE: 
+* MUST make sure the offset of root partition same as the target system(linux-kernel defined)
+* Here Skip (params) partition, and need not care about the offset because it be
+* included in bootloader partition.
+*/
+#define MTDPARTS_DEFAULT "mtdparts=nandflash0:4M@0(uboot+params)," \
+                         "4M(kernel_uImage)," \
+                         "-(rootfs)"
+
+//mtdblock0 [0M-1M]/[0M-4M]
 #define  IMG_UBOOT_OFFSET     0
 #define  IMG_UBOOT_SIZE       0x100000
 
-#define  IMG_KERNEL_OFFSET    0x100000
-#define  IMG_KERNEL_SIZE      0x400000
+//mtdblock1 [4M-7M]/[4M-8M]
+#define  IMG_KERNEL_OFFSET    0x400000
+#define  IMG_KERNEL_SIZE      0x300000
 
-#define  IMG_ROOTFS_OFFSET    0x500000
-#define  IMG_ROOTFS_SIZE      0x600000
+//mtdblock2 [8M-?]
+#define  IMG_ROOTFS_OFFSET    0x800000
 
 
 
@@ -318,34 +386,43 @@
 #define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x200000 - CONFIG_ENV_SIZE)//wx:norflash: 2M:0
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_SIZE			 (0x20000) // 128*1024, wx: MUST mutiply with Block Size(128K)
+#define CONFIG_ENV_SIZE			 (0x20000) // 128*1024, wx: MUST mutiply with Block Size(128K), orelse env will write failed
 #define CONFIG_ENV_OFFSET      	 (IMG_UBOOT_OFFSET + IMG_UBOOT_SIZE - CONFIG_ENV_SIZE)//wx:nand,2M:254M
 #else
 #error save environments?
 #endif
 
+
+
+
 // boot default 
 #define CONFIG_BOOTCOMMAND  \
        "nand read " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)\
-       ";bootm" BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
+       ";bootm" " " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
 
+//-----------------------------------------------------------------------------
 //wx: usage: run 'cmdname' on console input line.
 #define INSTALL_UBOOT_COMMAND  \
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " IMG_UBOOT_PATH\
         ";nand erase " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)\
-        ";nand write " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)
+        ";nand write $fileaddr"  " " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)
 
+#if 0
 #define INSTALL_KERNEL_COMMAND  \
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
         ";nand erase " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)\
-        ";nand write " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)
+        ";nand write $fileaddr"  " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)
+#else
+#define INSTALL_KERNEL_COMMAND  \
+        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
+        ";nand erase " BT_MK_STR(IMG_KERNEL_OFFSET) "  $filesize"\
+        ";nand write $fileaddr"  " " BT_MK_STR(IMG_KERNEL_OFFSET) " $filesize"
 
+#endif
 #define INSTALL_ROOTFS_COMMAND  \
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " "IMG_ROOTFS_PATH\
-        ";nand erase " BT_MK_STR(IMG_ROOTFS_OFFSET) " " BT_MK_STR(IMG_ROOTFS_SIZE)\
-  ";nand write.jffs2 " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " BT_MK_STR(IMG_ROOTFS_OFFSET) " " BT_MK_STR(IMG_ROOTFS_SIZE)
-
-
+        ";nand erase " BT_MK_STR(IMG_ROOTFS_OFFSET) "  $filesize"\
+        ";nand write.yaffs  $fileaddr " BT_MK_STR(IMG_ROOTFS_OFFSET) " $filesize"
 
 
 /* additions for new relocation code, must be added to all boards */
