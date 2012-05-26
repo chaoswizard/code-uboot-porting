@@ -131,6 +131,9 @@ const uchar default_environment[] = {
 #ifdef INSTALL_ROOTFS_COMMAND
    "install-rootfs=" INSTALL_ROOTFS_COMMAND    "\0"
 #endif
+#ifdef ERASE_PARAM_COMMAND
+   "erase-param=" ERASE_PARAM_COMMAND    "\0"
+#endif
 	"\0"
 };
 

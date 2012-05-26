@@ -308,8 +308,8 @@
 #define CONFIG_RBTREE
 
 
-#define BT_XMK_STR(x)	#x
-#define BT_MK_STR(x)	BT_XMK_STR(x)
+#define BT_XMK_STR(x)	   #x
+#define BT_MK_STR(x)       BT_XMK_STR(x)
 
 
 #define  IMG_UBOOT_PATH      "u-boot.bin"
@@ -371,6 +371,10 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 #define  IMG_UBOOT_OFFSET     0
 #define  IMG_UBOOT_SIZE       0x100000
 
+//between uboot and kernel
+#define  IMG_PARAM_OFFSET     0x200000
+#define  IMG_PARAM_SIZE       0x20000
+
 //mtdblock1 [4M-7M]/[4M-8M]
 #define  IMG_KERNEL_OFFSET    0x400000
 #define  IMG_KERNEL_SIZE      0x300000
@@ -381,18 +385,18 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 
 
 
-
 #if defined(CONFIG_ENV_IS_IN_FLASH)
 #define CONFIG_ENV_SIZE			 (0x10000) // 64*1024
 #define CONFIG_ENV_ADDR			 (CONFIG_SYS_FLASH_BASE + 0x200000 - CONFIG_ENV_SIZE)//wx:norflash: 2M:0
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_SIZE			 (0x20000) // 128*1024, wx: MUST mutiply with Block Size(128K), orelse env will write failed
-#define CONFIG_ENV_OFFSET      	 (IMG_UBOOT_OFFSET + IMG_UBOOT_SIZE - CONFIG_ENV_SIZE)//wx:nand,2M:254M
+#define CONFIG_ENV_SIZE			 (IMG_PARAM_SIZE) // 128*1024, wx: MUST mutiply with Block Size(128K), orelse env will write failed
+#define CONFIG_ENV_OFFSET      	 (IMG_PARAM_OFFSET)
 #else
 #error save environments?
 #endif
 
-
+#define BT_STR_ENV_OFFSET  BT_MK_STR(CONFIG_ENV_OFFSET)
+#define BT_STR_ENV_SIZE    BT_MK_STR(CONFIG_ENV_SIZE)
 
 
 // boot default 
@@ -404,26 +408,22 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 //wx: usage: run 'cmdname' on console input line.
 #define INSTALL_UBOOT_COMMAND  \
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)  " " IMG_UBOOT_PATH\
-        ";nand erase " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)\
-        ";nand write $fileaddr"  " " BT_MK_STR(IMG_UBOOT_OFFSET) " " BT_MK_STR(IMG_UBOOT_SIZE)
+        ";nand erase " BT_MK_STR(IMG_UBOOT_OFFSET) "  $filesize"\
+        ";nand write $fileaddr"  " " BT_MK_STR(IMG_UBOOT_OFFSET) " $filesize"
 
-#if 0
-#define INSTALL_KERNEL_COMMAND  \
-        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
-        ";nand erase " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)\
-        ";nand write $fileaddr"  " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)
-#else
 #define INSTALL_KERNEL_COMMAND  \
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
         ";nand erase " BT_MK_STR(IMG_KERNEL_OFFSET) "  $filesize"\
         ";nand write $fileaddr"  " " BT_MK_STR(IMG_KERNEL_OFFSET) " $filesize"
-
-#endif
+        
 #define INSTALL_ROOTFS_COMMAND  \
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " "IMG_ROOTFS_PATH\
         ";nand erase " BT_MK_STR(IMG_ROOTFS_OFFSET) "  $filesize"\
         ";nand write.yaffs  $fileaddr " BT_MK_STR(IMG_ROOTFS_OFFSET) " $filesize"
 
+#define ERASE_PARAM_COMMAND  \
+        "nand erase " BT_MK_STR(IMG_PARAM_OFFSET) "  "BT_MK_STR(IMG_PARAM_SIZE)
+        
 
 /* additions for new relocation code, must be added to all boards */
 //wx:comment physical ram start address.(mini2440 sdram use nGCS6)
