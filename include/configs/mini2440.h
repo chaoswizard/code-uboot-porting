@@ -145,14 +145,25 @@
 #define CONFIG_RESET_TO_RETRY
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
+#define CONFIG_BOOTARGS_RAMDISK         	\
+	"root=/dev/mtdblock2 rw "\
+	"rootfstype=cramfs "\
+	"console=ttySAC0,115200 "\
+    "noinitrd "\
+	"mem=64M "\
+    "init=/linuxrc"
+    
+#define CONFIG_BOOTARGS_YAFFS         	\
+    "root=/dev/mtdblock2 rw "\
+    "rootfstype=yaffs "\
+    "noinitrd "\
+    "console=ttySAC0,115200 "\
+    "init=/linuxrc"
+
 
 // nand flash boot, rootfs at mtd3, refer to kernel partition.
-#define CONFIG_BOOTARGS         	\
-	"noinitrd "\
-	"console=ttySAC0,115200 "\
-	"root=/dev/mtdblock2 rw "\
-	"rootfstype=yaffs "\
-    "init=/linuxrc"
+#define CONFIG_BOOTARGS    CONFIG_BOOTARGS_RAMDISK
+
 
 
 
@@ -423,7 +434,15 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 
 #define ERASE_PARAM_COMMAND  \
         "nand erase " BT_MK_STR(IMG_PARAM_OFFSET) "  "BT_MK_STR(IMG_PARAM_SIZE)
-        
+
+#define SET_CRAMFS_BOOTARGS_COMMAND  \
+        "setenv bootargs " CONFIG_BOOTARGS_RAMDISK
+
+
+#define SET_YAFFSFS_BOOTARGS_COMMAND  \
+        "setenv bootargs " CONFIG_BOOTARGS_YAFFS
+
+
 
 /* additions for new relocation code, must be added to all boards */
 //wx:comment physical ram start address.(mini2440 sdram use nGCS6)

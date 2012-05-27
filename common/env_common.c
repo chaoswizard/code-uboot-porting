@@ -134,6 +134,12 @@ const uchar default_environment[] = {
 #ifdef ERASE_PARAM_COMMAND
    "erase-param=" ERASE_PARAM_COMMAND    "\0"
 #endif
+#ifdef SET_CRAMFS_BOOTARGS_COMMAND
+   "set-rootfs-cramfs=" SET_CRAMFS_BOOTARGS_COMMAND    "\0"
+#endif
+#ifdef SET_YAFFSFS_BOOTARGS_COMMAND
+   "set-rootfs-yaffs=" SET_YAFFSFS_BOOTARGS_COMMAND    "\0"
+#endif
 	"\0"
 };
 
