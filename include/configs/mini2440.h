@@ -153,6 +153,7 @@
 	"mem=64M "\
     "init=/linuxrc"
     
+// nand flash boot, rootfs at mtd2, refer to kernel partition.
 #define CONFIG_BOOTARGS_YAFFS         	\
     "root=/dev/mtdblock2 rw "\
     "rootfstype=yaffs "\
@@ -160,16 +161,27 @@
     "console=ttySAC0,115200 "\
     "init=/linuxrc"
 
-#define CONFIG_BOOTARGS_RAMFS_KERNEL_AND_FS         	\
+#define CONFIG_BOOTARGS_RAMFS_P_IMG         	\
     "root=ramfs "\
     "devfs=mount "\
-    "console=ttySAC0,115200 "
+    "console=ttySAC0,115200"
 
 
-// nand flash boot, rootfs at mtd3, refer to kernel partition.
-#define CONFIG_BOOTARGS    CONFIG_BOOTARGS_CRAMFS
+#define CONFIG_BOOTARGS    CONFIG_BOOTARGS_RAMFS_P_IMG
 
 
+#define SET_CRAMFS_BOOTARGS_COMMAND  \
+    "setenv bootargs " CONFIG_BOOTARGS_CRAMFS
+
+
+#define SET_YAFFSFS_BOOTARGS_COMMAND  \
+    "setenv bootargs " CONFIG_BOOTARGS_YAFFS
+
+
+#define SET_RAMFS_P_BOOTARGS_COMMAND  \
+    "setenv bootargs " CONFIG_BOOTARGS_RAMFS_P_IMG
+
+//-----------------------------------------------------------------------------
 
 
 
@@ -417,17 +429,17 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
 
 //==============================================================================
 
-#define CONFIG_NAND_BOOTCOMMAND  \
+#define BOOT_FROM_NAND_COMMAND  \
        "nand read " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " BT_MK_STR(IMG_KERNEL_OFFSET) " " BT_MK_STR(IMG_KERNEL_SIZE)\
        ";bootm" " " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
 
-#define CONFIG_TFTP_BOOTCOMMAND  \
+#define BOOT_FROM_TFTP_COMMAND  \
        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
        ";bootm" " " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
 
 //-----------------------------------------------------------------------------
 // boot default 
-#define CONFIG_BOOTCOMMAND CONFIG_NAND_BOOTCOMMAND
+#define CONFIG_BOOTCOMMAND BOOT_FROM_TFTP_COMMAND
 //==============================================================================
 //==============================================================================
 //wx: usage: run 'cmdname' on console input line.
@@ -452,22 +464,6 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
         "nand erase " BT_MK_STR(IMG_PARAM_OFFSET) "  "BT_MK_STR(IMG_PARAM_SIZE)
 
 //-----------------------------------------------------------------------------
-
-#define SET_CRAMFS_BOOTARGS_COMMAND  \
-        "setenv bootargs " CONFIG_BOOTARGS_CRAMFS
-
-
-#define SET_YAFFSFS_BOOTARGS_COMMAND  \
-        "setenv bootargs " CONFIG_BOOTARGS_YAFFS
-//-----------------------------------------------------------------------------
-
-#define SET_NAND_BOOTCMD_COMMAND  \
-        "setenv bootcmd " CONFIG_NAND_BOOTCOMMAND
-
-#define SET_TFTP_BOOTCMD_COMMAND  \
-        "setenv bootcmd " CONFIG_TFTP_BOOTCOMMAND
-
-//------------------------------------------------------------------------------
 
 /* additions for new relocation code, must be added to all boards */
 //wx:comment physical ram start address.(mini2440 sdram use nGCS6)
