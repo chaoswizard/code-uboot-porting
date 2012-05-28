@@ -140,6 +140,12 @@ const uchar default_environment[] = {
 #ifdef SET_YAFFSFS_BOOTARGS_COMMAND
    "set-rootfs-yaffs=" SET_YAFFSFS_BOOTARGS_COMMAND    "\0"
 #endif
+#ifdef SET_TFTP_BOOTCMD_COMMAND
+   "set-bootcmd-tftp=" SET_TFTP_BOOTCMD_COMMAND    "\0"
+#endif
+#ifdef SET_NAND_BOOTCMD_COMMAND
+   "set-bootcmd-nand=" SET_NAND_BOOTCMD_COMMAND    "\0"
+#endif
 	"\0"
 };
 
