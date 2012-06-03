@@ -145,6 +145,7 @@
 #define CONFIG_RESET_TO_RETRY
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
+//-----------------------------------------------------------------------------
 #define CONFIG_BOOTARGS_CRAMFS         	\
 	"root=/dev/mtdblock2 rw "\
 	"rootfstype=cramfs "\
@@ -152,7 +153,7 @@
     "noinitrd "\
 	"mem=64M "\
     "init=/linuxrc"
-    
+//-----------------------------------------------------------------------------
 // nand flash boot, rootfs at mtd2, refer to kernel partition.
 #define CONFIG_BOOTARGS_YAFFS         	\
     "root=/dev/mtdblock2 rw "\
@@ -160,15 +161,23 @@
     "noinitrd "\
     "console=ttySAC0,115200 "\
     "init=/linuxrc"
-
+//------------- ramfs  use init instead of linuxrc -----------------------------
 #define CONFIG_BOOTARGS_RAMFS_P_IMG         	\
     "root=ramfs "\
     "devfs=mount "\
     "console=ttySAC0,115200"
+//-----------------------------------------------------------------------------
+#define CONFIG_BOOTARGS_RAMDISK_IMG         	\
+    "initrd=0x31000000,0x400000 "\
+    "mem=64M "\
+    "root=/dev/ram rw "\
+    "console=ttySAC0,115200 "\
+    "init=/linuxrc"
+//-----------------------------------------------------------------------------
 
 
 #define CONFIG_BOOTARGS    CONFIG_BOOTARGS_RAMFS_P_IMG
-
+//-----------------------------------------------------------------------------
 
 #define SET_CRAMFS_BOOTARGS_COMMAND  \
     "setenv bootargs " CONFIG_BOOTARGS_CRAMFS
@@ -181,8 +190,10 @@
 #define SET_RAMFS_P_BOOTARGS_COMMAND  \
     "setenv bootargs " CONFIG_BOOTARGS_RAMFS_P_IMG
 
-//-----------------------------------------------------------------------------
+#define SET_RAMDISK_BOOTARGS_COMMAND  \
+    "setenv bootargs " CONFIG_BOOTARGS_RAMDISK_IMG
 
+//==============================================================================E
 
 
 //wx: the Head 3 bytes MUST is a valid Value,or else the MAC will set Failed.
@@ -437,6 +448,11 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
        ";bootm" " " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
 
+
+#define BOOT_FROM_RAMDISK_COMMAND  \
+        "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " " IMG_KERNEL_PATH\
+        ";tftp " "0x31000000 " IMG_ROOTFS_PATH\
+        ";bootm" " " BT_MK_STR(CONFIG_SYS_LOAD_ADDR)
 //-----------------------------------------------------------------------------
 // boot default 
 #define CONFIG_BOOTCOMMAND BOOT_FROM_TFTP_COMMAND
@@ -457,7 +473,7 @@ static struct mtd_partition friendly_arm_default_nand_part[] = {
         "tftp " BT_MK_STR(CONFIG_SYS_LOAD_ADDR) " "IMG_ROOTFS_PATH\
         ";nand erase " BT_MK_STR(IMG_ROOTFS_OFFSET) "  $filesize"\
         ";nand write.yaffs  $fileaddr " BT_MK_STR(IMG_ROOTFS_OFFSET) " $filesize"
-        
+
 //-----------------------------------------------------------------------------
 
 #define ERASE_PARAM_COMMAND  \

@@ -134,20 +134,26 @@ const uchar default_environment[] = {
 #ifdef ERASE_PARAM_COMMAND
    "erase-param=" ERASE_PARAM_COMMAND    "\0"
 #endif
-#ifdef SET_CRAMFS_BOOTARGS_COMMAND
-   "use-cramfs=" SET_CRAMFS_BOOTARGS_COMMAND    "\0"
-#endif
 #ifdef SET_YAFFSFS_BOOTARGS_COMMAND
    "use-yaffs=" SET_YAFFSFS_BOOTARGS_COMMAND    "\0"
 #endif
+#ifdef SET_CRAMFS_BOOTARGS_COMMAND
+   "use-cramfs=" SET_CRAMFS_BOOTARGS_COMMAND    "\0"
+#endif
 #ifdef SET_RAMFS_P_BOOTARGS_COMMAND
    "use-ramfs_p=" SET_RAMFS_P_BOOTARGS_COMMAND    "\0"
+#endif
+#ifdef SET_RAMDISK_BOOTARGS_COMMAND
+   "use-ramdisk=" SET_RAMDISK_BOOTARGS_COMMAND    "\0"
 #endif
 #ifdef BOOT_FROM_TFTP_COMMAND
    "boot-from-tftp=" BOOT_FROM_TFTP_COMMAND    "\0"
 #endif
 #ifdef BOOT_FROM_NAND_COMMAND
    "boot-from-nand=" BOOT_FROM_NAND_COMMAND    "\0"
+#endif
+#ifdef BOOT_FROM_RAMDISK_COMMAND
+   "boot-from-ramdisk=" BOOT_FROM_RAMDISK_COMMAND    "\0"
 #endif
 	"\0"
 };
